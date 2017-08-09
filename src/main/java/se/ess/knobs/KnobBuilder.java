@@ -17,13 +17,16 @@
 package se.ess.knobs;
 
 
+import eu.hansolo.fx.regulators.RegulatorEvent;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.event.EventHandler;
+import javafx.geometry.Dimension2D;
+import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Stop;
 
 
 /**
@@ -37,14 +40,26 @@ public class KnobBuilder {
         return new KnobBuilder();
     }
 
-    final Map<String, Property<?>> properties = new HashMap<>(4);
+    final Map<String, Object> properties = new HashMap<>(4);
 
     protected KnobBuilder() {
     }
 
+    public Knob build() {
+
+        final Knob knob = new Knob();
+
+        if ( properties.containsKey("color") ) {
+            knob.setColor((Color) properties.get("color"));
+        }
+
+        return knob;
+
+    }
+
     public final KnobBuilder color( final Color color ) {
 
-        properties.put("color", new SimpleObjectProperty<>(color));
+        properties.put("color", color);
 
         return this;
 
@@ -52,39 +67,243 @@ public class KnobBuilder {
 
     public final KnobBuilder currentValue( final double value ) {
 
-        properties.put("currentValue", new SimpleDoubleProperty(value));
+        properties.put("currentValue", value);
 
         return this;
 
     }
 
-    public final KnobBuilder maxValue( final double maxValue ) {
+    public final KnobBuilder decimals( final int decimals ) {
 
-        properties.put("maxValue", new SimpleDoubleProperty(maxValue));
-
-        return this;
-
-    }
-
-    public final KnobBuilder minValue( final double minValue ) {
-
-        properties.put("minValue", new SimpleDoubleProperty(minValue));
+        properties.put("decimals", decimals);
 
         return this;
 
     }
 
-    public final KnobBuilder targetValue( final double targetValue ) {
+    public final KnobBuilder gradientStops( final Stop... stops ) {
+        return gradientStops(Arrays.asList(stops));
+    }
 
-        properties.put("targetValue", new SimpleDoubleProperty(targetValue));
+    public final KnobBuilder gradientStops( final List<Stop> stops ) {
+
+        properties.put("gradientStops", stops);
 
         return this;
 
     }
 
-    public final KnobBuilder textColor( final Color textColor ) {
+    public final KnobBuilder indicatorColor( final Color color ) {
 
-        properties.put("textColor", new SimpleObjectProperty<>(textColor));
+        properties.put("indicatorColor", color);
+
+        return this;
+
+    }
+
+    public final KnobBuilder layoutX( final double scale ) {
+
+        properties.put("layoutX", scale);
+
+        return this;
+
+    }
+
+    public final KnobBuilder layoutY( final double scale ) {
+
+        properties.put("layoutY", scale);
+
+        return this;
+
+    }
+
+    public final KnobBuilder maxHeight( final double height ) {
+
+        properties.put("maxHeight", height);
+
+        return this;
+
+    }
+
+    public final KnobBuilder maxSize( final double width, final double height ) {
+
+        properties.put("maxSize", new Dimension2D(width, height));
+
+        return this;
+
+    }
+
+    public final KnobBuilder maxValue( final double value ) {
+
+        properties.put("maxValue", value);
+
+        return this;
+
+    }
+
+    public final KnobBuilder maxWidth( final double width ) {
+
+        properties.put("maxWidth", width);
+
+        return this;
+
+    }
+
+    public final KnobBuilder minHeight( final double height ) {
+
+        properties.put("minHeight", height);
+
+        return this;
+
+    }
+
+    public final KnobBuilder minSize( final double width, final double height ) {
+
+        properties.put("minSize", new Dimension2D(width, height));
+
+        return this;
+
+    }
+
+    public final KnobBuilder minValue( final double value ) {
+
+        properties.put("minValue", value);
+
+        return this;
+
+    }
+
+    public final KnobBuilder minWidth( final double width ) {
+
+        properties.put("minWidth", width);
+
+        return this;
+
+    }
+
+    public final KnobBuilder onAdjusted( final EventHandler<RegulatorEvent> handler ) {
+
+        properties.put("onAdjusted", handler);
+
+        return this;
+
+    }
+
+    public final KnobBuilder onAdjusting( final EventHandler<RegulatorEvent> handler ) {
+
+        properties.put("onAdjusting", handler);
+
+        return this;
+
+    }
+
+    public final KnobBuilder onTargetSet( final EventHandler<RegulatorEvent> handler ) {
+
+        properties.put("onTargetSet", handler);
+
+        return this;
+
+    }
+
+    public final KnobBuilder padding( final double topRightBottomLeft ) {
+        return padding(new Insets(topRightBottomLeft));
+    }
+
+    public final KnobBuilder padding( final double top, final double right, final double bottom, final double left ) {
+        return padding(new Insets(top, right, bottom, left));
+    }
+
+    public final KnobBuilder padding( final Insets insets ) {
+
+        properties.put("padding", insets);
+
+        return this;
+
+    }
+
+    public final KnobBuilder prefHeight( final double height ) {
+
+        properties.put("prefHeight", height);
+
+        return this;
+
+    }
+
+    public final KnobBuilder prefSize( final double width, final double height ) {
+
+        properties.put("prefSize", new Dimension2D(width, height));
+
+        return this;
+
+    }
+
+    public final KnobBuilder prefWidth( final double width ) {
+
+        properties.put("prefWidth", width);
+
+        return this;
+
+    }
+
+    public final KnobBuilder scaleX( final double scale ) {
+
+        properties.put("scaleX", scale);
+
+        return this;
+
+    }
+
+    public final KnobBuilder scaleY( final double scale ) {
+
+        properties.put("scaleY", scale);
+
+        return this;
+
+    }
+
+    public final KnobBuilder selected( final boolean value ) {
+
+        properties.put("selected", value);
+
+        return this;
+
+    }
+
+    public final KnobBuilder selectionColor( final Color color ) {
+
+        properties.put("selectionColor", color);
+
+        return this;
+
+    }
+
+    public final KnobBuilder targetValue( final double value ) {
+
+        properties.put("targetValue", value);
+
+        return this;
+
+    }
+
+    public final KnobBuilder textColor( final Color color ) {
+
+        properties.put("textColor", color);
+
+        return this;
+
+    }
+
+    public final KnobBuilder translateX( final double scale ) {
+
+        properties.put("translateX", scale);
+
+        return this;
+
+    }
+
+    public final KnobBuilder translateY( final double scale ) {
+
+        properties.put("translateY", scale);
 
         return this;
 
@@ -92,15 +311,15 @@ public class KnobBuilder {
 
     public final KnobBuilder unit( final String unit ) {
 
-        properties.put("unit", new SimpleStringProperty(unit));
+        properties.put("unit", unit);
 
         return this;
 
     }
 
-    public final KnobBuilder unitColor( final Color unitColor ) {
+    public final KnobBuilder unitColor( final Color color ) {
 
-        properties.put("unitColor", new SimpleObjectProperty<>(unitColor));
+        properties.put("unitColor", color);
 
         return this;
 

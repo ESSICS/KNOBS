@@ -18,11 +18,17 @@ package se.ess.knobs;
 
 
 import java.util.logging.Logger;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.junit.Test;
 import org.testfx.framework.junit.ApplicationTest;
 
-import static se.ess.knobs.KnobEvaluator.initStage;
 
 
 /**
@@ -40,7 +46,17 @@ public class KnobTest extends ApplicationTest {
 
     @Override
     public void start( Stage stage ) throws Exception {
-        initStage(stage).show();
+
+        HBox pane = new HBox();
+
+        pane.setSpacing(20);
+        pane.setPadding(new Insets(20));
+        pane.setBackground(new Background(new BackgroundFill(Color.rgb(66, 71, 79), CornerRadii.EMPTY, Insets.EMPTY)));
+
+        Scene scene = new Scene(pane);
+
+        stage.setScene(scene);
+
     }
 
 }

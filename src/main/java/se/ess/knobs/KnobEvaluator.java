@@ -17,14 +17,13 @@
 package se.ess.knobs;
 
 
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.application.Application;
-import javafx.geometry.Insets;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 
@@ -32,37 +31,28 @@ import javafx.stage.Stage;
  * @author Claudio Rosati, European Spallation Source ERIC
  * @version 1.0.0 8 Aug 2017
  */
-public class KnobEvaluator extends Application {
+public class KnobEvaluator extends Application implements Initializable {
 
     public static void main( String[] args ) {
         launch(args);
     }
 
-    /**
-     * Initialize the given {@link Stage} and return it.
-     *
-     * @param stage The {@link Stage} to be initialized.
-     * @return Return the given {@link Stage} after being initialized.
-     */
-    static Stage initStage ( Stage stage ) {
-
-        HBox pane = new HBox();
-
-        pane.setSpacing(20);
-        pane.setPadding(new Insets(20));
-        pane.setBackground(new Background(new BackgroundFill(Color.rgb(66, 71, 79), CornerRadii.EMPTY, Insets.EMPTY)));
-
-        Scene scene = new Scene(pane);
-
-        stage.setScene(scene);
-
-        return stage;
-
+    @Override
+    public void initialize( URL location, ResourceBundle resources ) {
     }
 
     @Override
     public void start( Stage stage ) throws Exception {
-        initStage(stage).show();
+
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/KnobEvaluator.fxml"));
+        Scene scene = new Scene(root);
+
+//        scene.getStylesheets().add("/styles/Styles.css");
+
+        stage.setTitle("Knob Evaluator");
+        stage.setScene(scene);
+        stage.show();
+
     }
 
 }
