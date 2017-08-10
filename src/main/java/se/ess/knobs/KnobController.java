@@ -59,11 +59,11 @@ public class KnobController implements Initializable {
 
         Map<Class<?>, String> categories = new HashMap<>(5);
 
-        categories.put(  Knob.class, "1. Knob");
-        categories.put(Region.class, "2. Region");
-        categories.put(Parent.class, "3. Parent");
-        categories.put(  Node.class, "4. Node");
-        categories.put(Object.class, "5. Object");
+        categories.put(  Knob.class, "\u200BKnob");
+        categories.put(Region.class, "\u200B\u200BRegion");
+        categories.put(Parent.class, "\u200B\u200B\u200BParent");
+        categories.put(  Node.class, "\u200B\u200B\u200B\u200BNode");
+        categories.put(Object.class, "\u200B\u200B\u200B\u200B\u200BObject");
 
         try {
 

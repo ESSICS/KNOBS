@@ -17,7 +17,6 @@
 package se.ess.knobs;
 
 
-import eu.hansolo.fx.regulators.RegulatorEvent;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
@@ -108,6 +107,40 @@ public class KnobBuilderTest {
     }
 
     /**
+     * Test of currentValueAlwaysVisible method, of class KnobBuilder.
+     */
+    @Test
+    public void testCurrentValueAlwaysVisible() {
+
+        boolean value = true;
+        KnobBuilder builder = KnobBuilder.create().currentValueAlwaysVisible(value);
+
+        assertThat(builder.properties)
+            .containsKey("currentValueAlwaysVisible");
+        assertThat(builder.properties.get("currentValueAlwaysVisible"))
+            .isExactlyInstanceOf(Boolean.class)
+            .isEqualTo(value);
+
+    }
+
+    /**
+     * Test of currentValueColor method, of class KnobBuilder.
+     */
+    @Test
+    public void testCurrentValueColor() {
+
+        Color value = Color.GOLDENROD;
+        KnobBuilder builder = KnobBuilder.create().currentValueColor(value);
+
+        assertThat(builder.properties)
+            .containsKey("currentValueColor");
+        assertThat(builder.properties.get("currentValueColor"))
+            .isExactlyInstanceOf(Color.class)
+            .isEqualTo(value);
+
+    }
+
+    /**
      * Test of decimals method, of class KnobBuilder.
      */
     @Test
@@ -120,6 +153,23 @@ public class KnobBuilderTest {
             .containsKey("decimals");
         assertThat(builder.properties.get("decimals"))
             .isExactlyInstanceOf(Integer.class)
+            .isEqualTo(value);
+
+    }
+
+    /**
+     * Test of extremaColor method, of class KnobBuilder.
+     */
+    @Test
+    public void testExtremaColor() {
+
+        Color value = Color.GOLDENROD;
+        KnobBuilder builder = KnobBuilder.create().extremaColor(value);
+
+        assertThat(builder.properties)
+            .containsKey("extremaColor");
+        assertThat(builder.properties.get("extremaColor"))
+            .isExactlyInstanceOf(Color.class)
             .isEqualTo(value);
 
     }
@@ -158,6 +208,23 @@ public class KnobBuilderTest {
         assertThat(builder.properties)
             .containsKey("gradientStops")
             .contains(entry("gradientStops", null));
+
+    }
+
+    /**
+     * Test of id method, of class KnobBuilder.
+     */
+    @Test
+    public void testID() {
+
+        String value = "an identifier";
+        KnobBuilder builder = KnobBuilder.create().id(value);
+
+        assertThat(builder.properties)
+            .containsKey("id");
+        assertThat(builder.properties.get("id"))
+            .isExactlyInstanceOf(String.class)
+            .isEqualTo(value);
 
     }
 
@@ -356,7 +423,7 @@ public class KnobBuilderTest {
     @Test
     public void testOnAdjusted() {
 
-        EventHandler<RegulatorEvent> value = e -> LOGGER.info("testOnAdjusted handler");
+        EventHandler<KnobEvent> value = e -> LOGGER.info("testOnAdjusted handler");
         KnobBuilder builder = KnobBuilder.create().onAdjusted(value);
 
         assertThat(builder.properties)
@@ -373,7 +440,7 @@ public class KnobBuilderTest {
     @Test
     public void testOnAdjusting() {
 
-        EventHandler<RegulatorEvent> value = e -> LOGGER.info("testOnAdjusting handler");
+        EventHandler<KnobEvent> value = e -> LOGGER.info("testOnAdjusting handler");
         KnobBuilder builder = KnobBuilder.create().onAdjusting(value);
 
         assertThat(builder.properties)
@@ -390,7 +457,7 @@ public class KnobBuilderTest {
     @Test
     public void testOnTargetSet() {
 
-        EventHandler<RegulatorEvent> value = e -> LOGGER.info("testOnTargetSet handler");
+        EventHandler<KnobEvent> value = e -> LOGGER.info("testOnTargetSet handler");
         KnobBuilder builder = KnobBuilder.create().onTargetSet(value);
 
         assertThat(builder.properties)
@@ -539,6 +606,40 @@ public class KnobBuilderTest {
     }
 
     /**
+     * Test of showExtrema method, of class KnobBuilder.
+     */
+    @Test
+    public void testShowExtrema() {
+
+        boolean value = true;
+        KnobBuilder builder = KnobBuilder.create().showExtrema(value);
+
+        assertThat(builder.properties)
+            .containsKey("showExtrema");
+        assertThat(builder.properties.get("showExtrema"))
+            .isExactlyInstanceOf(Boolean.class)
+            .isEqualTo(value);
+
+    }
+
+    /**
+     * Test of showTag method, of class KnobBuilder.
+     */
+    @Test
+    public void testShowTag() {
+
+        boolean value = true;
+        KnobBuilder builder = KnobBuilder.create().showTag(value);
+
+        assertThat(builder.properties)
+            .containsKey("showTag");
+        assertThat(builder.properties.get("showTag"))
+            .isExactlyInstanceOf(Boolean.class)
+            .isEqualTo(value);
+
+    }
+
+    /**
      * Test of selectionColor method, of class KnobBuilder.
      */
     @Test
@@ -550,6 +651,23 @@ public class KnobBuilderTest {
         assertThat(builder.properties)
             .containsKey("selectionColor");
         assertThat(builder.properties.get("selectionColor"))
+            .isExactlyInstanceOf(Color.class)
+            .isEqualTo(value);
+
+    }
+
+    /**
+     * Test of tagColor method, of class KnobBuilder.
+     */
+    @Test
+    public void testTagColor() {
+
+        Color value = Color.GOLDENROD;
+        KnobBuilder builder = KnobBuilder.create().tagColor(value);
+
+        assertThat(builder.properties)
+            .containsKey("tagColor");
+        assertThat(builder.properties.get("tagColor"))
             .isExactlyInstanceOf(Color.class)
             .isEqualTo(value);
 

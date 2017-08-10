@@ -17,7 +17,6 @@
 package se.ess.knobs;
 
 
-import eu.hansolo.fx.regulators.RegulatorEvent;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,9 @@ import javafx.scene.paint.Stop;
 
 /**
  * @author Claudio Rosati, European Spallation Source ERIC
+ * @author HanSolo, creator of the original Regulators classes.
  * @version 1.0.0 8 Aug 2017
+ * @see <a href="https://github.com/HanSolo/regulators">HanSolo's Regulators</a>
  */
 @SuppressWarnings("ClassWithoutLogger")
 public class KnobBuilder {
@@ -51,6 +52,21 @@ public class KnobBuilder {
 
         if ( properties.containsKey("color") ) {
             knob.setColor((Color) properties.get("color"));
+        }
+        if ( properties.containsKey("currentValue") ) {
+            knob.setCurrentValue((double) properties.get("currentValue"));
+        }
+        if ( properties.containsKey("currentValueAlwaysVisible") ) {
+            knob.setCurrentValueAlwaysVisible((boolean) properties.get("currentValueAlwaysVisible"));
+        }
+        if ( properties.containsKey("maxValue") ) {
+            knob.setMaxValue((double) properties.get("maxValue"));
+        }
+        if ( properties.containsKey("minValue") ) {
+            knob.setMinValue((double) properties.get("minValue"));
+        }
+        if ( properties.containsKey("targetValue") ) {
+            knob.setTargetValue((double) properties.get("targetValue"));
         }
 
         return knob;
@@ -73,9 +89,33 @@ public class KnobBuilder {
 
     }
 
+    public final KnobBuilder currentValueAlwaysVisible( final boolean value ) {
+
+        properties.put("currentValueAlwaysVisible", value);
+
+        return this;
+
+    }
+
+    public final KnobBuilder currentValueColor( final Color color ) {
+
+        properties.put("currentValueColor", color);
+
+        return this;
+
+    }
+
     public final KnobBuilder decimals( final int decimals ) {
 
         properties.put("decimals", decimals);
+
+        return this;
+
+    }
+
+    public final KnobBuilder extremaColor( final Color color ) {
+
+        properties.put("extremaColor", color);
 
         return this;
 
@@ -88,6 +128,14 @@ public class KnobBuilder {
     public final KnobBuilder gradientStops( final List<Stop> stops ) {
 
         properties.put("gradientStops", stops);
+
+        return this;
+
+    }
+
+    public final KnobBuilder id( final String unit ) {
+
+        properties.put("id", unit);
 
         return this;
 
@@ -181,7 +229,7 @@ public class KnobBuilder {
 
     }
 
-    public final KnobBuilder onAdjusted( final EventHandler<RegulatorEvent> handler ) {
+    public final KnobBuilder onAdjusted( final EventHandler<KnobEvent> handler ) {
 
         properties.put("onAdjusted", handler);
 
@@ -189,7 +237,7 @@ public class KnobBuilder {
 
     }
 
-    public final KnobBuilder onAdjusting( final EventHandler<RegulatorEvent> handler ) {
+    public final KnobBuilder onAdjusting( final EventHandler<KnobEvent> handler ) {
 
         properties.put("onAdjusting", handler);
 
@@ -197,7 +245,7 @@ public class KnobBuilder {
 
     }
 
-    public final KnobBuilder onTargetSet( final EventHandler<RegulatorEvent> handler ) {
+    public final KnobBuilder onTargetSet( final EventHandler<KnobEvent> handler ) {
 
         properties.put("onTargetSet", handler);
 
@@ -269,9 +317,33 @@ public class KnobBuilder {
 
     }
 
+    public final KnobBuilder showExtrema( final boolean value ) {
+
+        properties.put("showExtrema", value);
+
+        return this;
+
+    }
+
+    public final KnobBuilder showTag( final boolean value ) {
+
+        properties.put("showTag", value);
+
+        return this;
+
+    }
+
     public final KnobBuilder selectionColor( final Color color ) {
 
         properties.put("selectionColor", color);
+
+        return this;
+
+    }
+
+    public final KnobBuilder tagColor( final Color color ) {
+
+        properties.put("tagColor", color);
 
         return this;
 
