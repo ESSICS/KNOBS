@@ -46,27 +46,100 @@ public class KnobBuilder {
     protected KnobBuilder() {
     }
 
+    public final KnobBuilder backgroundColor( final Color color ) {
+
+        properties.put("backgroundColor", color);
+
+        return this;
+
+    }
+
     public Knob build() {
 
         final Knob knob = new Knob();
 
-        if ( properties.containsKey("color") ) {
-            knob.setColor((Color) properties.get("color"));
-        }
-        if ( properties.containsKey("currentValue") ) {
-            knob.setCurrentValue((double) properties.get("currentValue"));
-        }
-        if ( properties.containsKey("currentValueAlwaysVisible") ) {
-            knob.setCurrentValueAlwaysVisible((boolean) properties.get("currentValueAlwaysVisible"));
+        //  Inter-dependent properties.
+        if ( properties.containsKey("minValue") ) {
+            knob.setMinValue((double) properties.get("minValue"));
         }
         if ( properties.containsKey("maxValue") ) {
             knob.setMaxValue((double) properties.get("maxValue"));
         }
-        if ( properties.containsKey("minValue") ) {
-            knob.setMinValue((double) properties.get("minValue"));
+        if ( properties.containsKey("currentValue") ) {
+            knob.setCurrentValue((double) properties.get("currentValue"));
+        }
+
+        //  All other properties.
+        if ( properties.containsKey("backgroundColor") ) {
+            knob.setBackgroundColor((Color) properties.get("backgroundColor"));
+        }
+        if ( properties.containsKey("color") ) {
+            knob.setColor((Color) properties.get("color"));
+        }
+        if ( properties.containsKey("currentValueAlwaysVisible") ) {
+            knob.setCurrentValueAlwaysVisible((boolean) properties.get("currentValueAlwaysVisible"));
+        }
+        if ( properties.containsKey("currentValueColor") ) {
+            knob.setCurrentValueColor((Color) properties.get("currentValueColor"));
+        }
+        if ( properties.containsKey("decimals") ) {
+            knob.setDecimals((int) properties.get("decimals"));
+        }
+        if ( properties.containsKey("id") ) {
+            knob.setId((String) properties.get("id"));
+        }
+        if ( properties.containsKey("layoutX") ) {
+            knob.setLayoutX((double) properties.get("layoutX"));
+        }
+        if ( properties.containsKey("layoutY") ) {
+            knob.setLayoutY((double) properties.get("layoutY"));
+        }
+        if ( properties.containsKey("maxHeight") ) {
+            knob.setMaxHeight((double) properties.get("maxHeight"));
+        }
+        if ( properties.containsKey("maxSize") ) {
+            
+            Dimension2D maxSize = (Dimension2D) properties.get("maxSize");
+            
+            knob.setMaxSize(maxSize.getWidth(), maxSize.getHeight());
+
+        }
+        if ( properties.containsKey("maxWidth") ) {
+            knob.setMaxWidth((double) properties.get("maxWidth"));
+        }
+        if ( properties.containsKey("minHeight") ) {
+            knob.setMinHeight((double) properties.get("minHeight"));
+        }
+        if ( properties.containsKey("minSize") ) {
+
+            Dimension2D minSize = (Dimension2D) properties.get("minSize");
+
+            knob.setMinSize(minSize.getWidth(), minSize.getHeight());
+
+        }
+        if ( properties.containsKey("minWidth") ) {
+            knob.setMinWidth((double) properties.get("minWidth"));
+        }
+        if ( properties.containsKey("opacity") ) {
+            knob.setOpacity((double) properties.get("opacity"));
+        }
+        if ( properties.containsKey("scaleX") ) {
+            knob.setScaleX((double) properties.get("scaleX"));
+        }
+        if ( properties.containsKey("scaleY") ) {
+            knob.setScaleY((double) properties.get("scaleY"));
         }
         if ( properties.containsKey("targetValue") ) {
             knob.setTargetValue((double) properties.get("targetValue"));
+        }
+        if ( properties.containsKey("textColor") ) {
+            knob.setTextColor((Color) properties.get("textColor"));
+        }
+        if ( properties.containsKey("translateX") ) {
+            knob.setTranslateX((double) properties.get("translateX"));
+        }
+        if ( properties.containsKey("translateY") ) {
+            knob.setTranslateY((double) properties.get("translateY"));
         }
 
         return knob;
@@ -253,6 +326,14 @@ public class KnobBuilder {
 
     }
 
+    public final KnobBuilder opacity( final double opacity ) {
+
+        properties.put("opacity", opacity);
+
+        return this;
+
+    }
+
     public final KnobBuilder padding( final double topRightBottomLeft ) {
         return padding(new Insets(topRightBottomLeft));
     }
@@ -317,6 +398,14 @@ public class KnobBuilder {
 
     }
 
+    public final KnobBuilder selectionColor( final Color color ) {
+
+        properties.put("selectionColor", color);
+
+        return this;
+
+    }
+
     public final KnobBuilder showExtrema( final boolean value ) {
 
         properties.put("showExtrema", value);
@@ -328,14 +417,6 @@ public class KnobBuilder {
     public final KnobBuilder showTag( final boolean value ) {
 
         properties.put("showTag", value);
-
-        return this;
-
-    }
-
-    public final KnobBuilder selectionColor( final Color color ) {
-
-        properties.put("selectionColor", color);
 
         return this;
 

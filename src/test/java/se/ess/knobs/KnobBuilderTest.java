@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import javafx.event.EventHandler;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
+import javafx.scene.layout.Background;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Stop;
 import org.junit.After;
@@ -57,6 +58,107 @@ public class KnobBuilderTest {
 
     @After
     public void tearDown() throws Exception {
+    }
+
+    /**
+     * Test of backgroundColor method, of class KnobBuilder.
+     */
+    @Test
+    public void testBackgroundColor() {
+
+        Color value = Color.GOLDENROD;
+        KnobBuilder builder = KnobBuilder.create().backgroundColor(value);
+
+        assertThat(builder.properties)
+            .containsKey("backgroundColor");
+        assertThat(builder.properties.get("backgroundColor"))
+            .isExactlyInstanceOf(Color.class)
+            .isEqualTo(value);
+
+    }
+
+    /**
+     * Test of build method, of class KnobBuilder.
+     */
+    @Test
+    public void testBuild() {
+
+        Knob knob;
+
+        knob = KnobBuilder.create()
+                          .backgroundColor(Color.GOLDENROD)
+                          .color(Color.CORAL)
+                          .currentValueAlwaysVisible(false)
+                          .currentValueColor(Color.GAINSBORO)
+                          .decimals(3)
+
+                          .minValue(-100)
+                          .maxValue(100)
+                          .currentValue(23.456)
+                          .build();
+
+        assertThat(knob)
+            .isNotNull()
+            .hasFieldOrPropertyWithValue("backgroundColor", Color.GOLDENROD)
+            .hasFieldOrPropertyWithValue("color", Color.CORAL)
+            .hasFieldOrPropertyWithValue("currentValue", 23.456)
+            .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", false)
+            .hasFieldOrPropertyWithValue("currentValueColor", Color.GAINSBORO)
+            .hasFieldOrPropertyWithValue("decimals", 3)
+            .hasFieldOrPropertyWithValue("minValue", -100.0)
+            .hasFieldOrPropertyWithValue("maxValue", 100.0)
+            ;
+
+        knob = KnobBuilder.create()
+                          .backgroundColor(null)
+                          .color(null)
+                          .currentValueAlwaysVisible(true)
+                          .currentValueColor(null)
+                          .decimals(80)
+
+                          .minValue(-100)
+                          .maxValue(100)
+                          .currentValue(200)
+                          .build();
+
+        assertThat(knob)
+            .isNotNull()
+            .hasFieldOrPropertyWithValue("backgroundColor", Color.TRANSPARENT)
+            .hasFieldOrPropertyWithValue("background", Background.EMPTY)
+            .hasFieldOrPropertyWithValue("color", Knob.DEFAULT_COLOR)
+            .hasFieldOrPropertyWithValue("currentValue", 100.0)
+            .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", true)
+            .hasFieldOrPropertyWithValue("currentValueColor", Knob.DEFAULT_CURRENT_VALUE_COLOR)
+            .hasFieldOrPropertyWithValue("decimals", 6)
+            .hasFieldOrPropertyWithValue("minValue", -100.0)
+            .hasFieldOrPropertyWithValue("maxValue", 100.0)
+            ;
+
+        knob = KnobBuilder.create()
+                          .backgroundColor(Color.TRANSPARENT)
+                          .decimals(-3)
+
+
+
+
+                          .minValue(-100)
+                          .maxValue(100)
+                          .currentValue(-200)
+                          .build();
+
+        assertThat(knob)
+            .isNotNull()
+            .hasFieldOrPropertyWithValue("backgroundColor", Color.TRANSPARENT)
+            .hasFieldOrPropertyWithValue("background", Background.EMPTY)
+            .hasFieldOrPropertyWithValue("color", Knob.DEFAULT_COLOR)
+            .hasFieldOrPropertyWithValue("currentValue", -100.0)
+            .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", true)
+            .hasFieldOrPropertyWithValue("currentValueColor", Knob.DEFAULT_CURRENT_VALUE_COLOR)
+            .hasFieldOrPropertyWithValue("decimals", 0)
+            .hasFieldOrPropertyWithValue("minValue", -100.0)
+            .hasFieldOrPropertyWithValue("maxValue", 100.0)
+            ;
+
     }
 
     /**
@@ -464,6 +566,23 @@ public class KnobBuilderTest {
             .containsKey("onTargetSet");
         assertThat(builder.properties.get("onTargetSet"))
             .isInstanceOf(EventHandler.class)
+            .isEqualTo(value);
+
+    }
+
+    /**
+     * Test of opacity method, of class KnobBuilder.
+     */
+    @Test
+    public void testOpacity() {
+
+        double value = 123.456;
+        KnobBuilder builder = KnobBuilder.create().opacity(value);
+
+        assertThat(builder.properties)
+            .containsKey("opacity");
+        assertThat(builder.properties.get("opacity"))
+            .isExactlyInstanceOf(Double.class)
             .isEqualTo(value);
 
     }
