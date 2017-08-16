@@ -22,9 +22,11 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -70,14 +72,18 @@ public class KnobController implements Initializable {
             BeanInfo beanInfo = Introspector.getBeanInfo(Knob.class, Object.class);
 
             for ( PropertyDescriptor p : beanInfo.getPropertyDescriptors() ) {
-
-                p.setValue(BeanProperty.CATEGORY_LABEL_KEY, categories.get(p.getReadMethod().getDeclaringClass()));
-                propertySheet.getItems().add(new BeanProperty(knob, p));
-
+                try {
+                    if ( p.getReadMethod() != null && p.getWriteMethod() != null ) {
+                        p.setValue(BeanProperty.CATEGORY_LABEL_KEY, categories.get(p.getReadMethod().getDeclaringClass()));
+                        propertySheet.getItems().add(new BeanProperty(knob, p));
+                    }
+                } catch ( Exception iex ) {
+                    LOGGER.log(Level.SEVERE, MessageFormat.format("Unable to handle property \"{0}\" [{1}].", p.getName(), iex.getMessage()));
+                }
             }
             
         } catch ( IntrospectionException ex ) {
-            LOGGER.throwing(getClass().getName(), "initialize", ex);
+            LOGGER.log(Level.SEVERE, "Unable to initialize the controller.", ex);
         }
 
         propertySheet.setMode(PropertySheet.Mode.CATEGORY);

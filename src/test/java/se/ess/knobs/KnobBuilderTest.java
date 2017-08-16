@@ -20,6 +20,7 @@ package se.ess.knobs;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
+import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
@@ -83,21 +84,35 @@ public class KnobBuilderTest {
     @Test
     public void testBuild() {
 
-        Knob knob;
+        Knob knob1 = KnobBuilder.create()
+                                .backgroundColor(Color.GOLDENROD)
+                                .color(Color.CORAL)
+                                .currentValueAlwaysVisible(false)
+                                .currentValueColor(Color.GAINSBORO)
+                                .decimals(3)
+                                .extremaVisible(true)
+                                .gradientStops((Stop) null)
+                                .id("pippo")
+                                .indicatorColor(Color.BLUEVIOLET)
+                                .layoutX(0.234)
+                                .layoutY(0.567)
+                                .maxHeight(345.678)
+                                .maxWidth(456.789)
+                                .minHeight(1.678)
+                                .minWidth(2.789)
+                                .selected(true)
+                                .selectionColor(Color.PEACHPUFF)
+                                .tagColor(Color.NAVAJOWHITE)
+                                .tagVisible(true)
+                                .textColor(Color.SLATEGREY)
+                                .unit("dB")
+                                .minValue(-100)
+                                .maxValue(100)
+                                .currentValue(23.456)
+                                .targetValue(34.567)
+                                .build();
 
-        knob = KnobBuilder.create()
-                          .backgroundColor(Color.GOLDENROD)
-                          .color(Color.CORAL)
-                          .currentValueAlwaysVisible(false)
-                          .currentValueColor(Color.GAINSBORO)
-                          .decimals(3)
-
-                          .minValue(-100)
-                          .maxValue(100)
-                          .currentValue(23.456)
-                          .build();
-
-        assertThat(knob)
+        assertThat(knob1)
             .isNotNull()
             .hasFieldOrPropertyWithValue("backgroundColor", Color.GOLDENROD)
             .hasFieldOrPropertyWithValue("color", Color.CORAL)
@@ -105,23 +120,54 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", false)
             .hasFieldOrPropertyWithValue("currentValueColor", Color.GAINSBORO)
             .hasFieldOrPropertyWithValue("decimals", 3)
-            .hasFieldOrPropertyWithValue("minValue", -100.0)
+            .hasFieldOrPropertyWithValue("extremaVisible", true)
+            .hasFieldOrPropertyWithValue("gradientStops", FXCollections.observableArrayList((Stop) null))
+            .hasFieldOrPropertyWithValue("indicatorColor", Color.BLUEVIOLET)
+            .hasFieldOrPropertyWithValue("id", "pippo")
+            .hasFieldOrPropertyWithValue("layoutX", 0.234)
+            .hasFieldOrPropertyWithValue("layoutY", 0.567)
+            .hasFieldOrPropertyWithValue("maxHeight", 345.678)
             .hasFieldOrPropertyWithValue("maxValue", 100.0)
+            .hasFieldOrPropertyWithValue("maxWidth", 456.789)
+            .hasFieldOrPropertyWithValue("minHeight", 1.678)
+            .hasFieldOrPropertyWithValue("minValue", -100.0)
+            .hasFieldOrPropertyWithValue("minWidth", 2.789)
+            .hasFieldOrPropertyWithValue("selected", true)
+            .hasFieldOrPropertyWithValue("selectionColor", Color.PEACHPUFF)
+            .hasFieldOrPropertyWithValue("tagColor", Color.NAVAJOWHITE)
+            .hasFieldOrPropertyWithValue("tagVisible", true)
+            .hasFieldOrPropertyWithValue("targetValue", 34.567)
+            .hasFieldOrPropertyWithValue("textColor", Color.SLATEGREY)
+            .hasFieldOrPropertyWithValue("unit", "dB")
             ;
 
-        knob = KnobBuilder.create()
-                          .backgroundColor(null)
-                          .color(null)
-                          .currentValueAlwaysVisible(true)
-                          .currentValueColor(null)
-                          .decimals(80)
+        Knob knob2 = KnobBuilder.create()
+                                .backgroundColor(null)
+                                .color(null)
+                                .currentValueAlwaysVisible(true)
+                                .currentValueColor(null)
+                                .decimals(80)
+                                .extremaVisible(false)
+                                .gradientStops((List<Stop>) null)
+                                .id(null)
+                                .indicatorColor(null)
+                                .layoutX(-1)
+                                .layoutY(-1)
+                                .maxSize(456.789, 345.678)
+                                .minSize(2.789, 1.678)
+                                .selected(false)
+                                .selectionColor(null)
+                                .tagColor(null)
+                                .tagVisible(false)
+                                .textColor(null)
+                                .unit(null)
+                                .minValue(-100)
+                                .maxValue(100)
+                                .currentValue(200)
+                                .targetValue(200)
+                                .build();
 
-                          .minValue(-100)
-                          .maxValue(100)
-                          .currentValue(200)
-                          .build();
-
-        assertThat(knob)
+        assertThat(knob2)
             .isNotNull()
             .hasFieldOrPropertyWithValue("backgroundColor", Color.TRANSPARENT)
             .hasFieldOrPropertyWithValue("background", Background.EMPTY)
@@ -130,23 +176,49 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", true)
             .hasFieldOrPropertyWithValue("currentValueColor", Knob.DEFAULT_CURRENT_VALUE_COLOR)
             .hasFieldOrPropertyWithValue("decimals", 6)
-            .hasFieldOrPropertyWithValue("minValue", -100.0)
+            .hasFieldOrPropertyWithValue("extremaVisible", false)
+            .hasFieldOrPropertyWithValue("gradientStops", FXCollections.emptyObservableList())
+            .hasFieldOrPropertyWithValue("id", null)
+            .hasFieldOrPropertyWithValue("indicatorColor", Knob.DEFAULT_COLOR.darker())
+            .hasFieldOrPropertyWithValue("layoutX", -1.0)
+            .hasFieldOrPropertyWithValue("layoutY", -1.0)
+            .hasFieldOrPropertyWithValue("maxHeight", 345.678)
             .hasFieldOrPropertyWithValue("maxValue", 100.0)
-            ;
+            .hasFieldOrPropertyWithValue("maxWidth", 456.789)
+            .hasFieldOrPropertyWithValue("minHeight", 1.678)
+            .hasFieldOrPropertyWithValue("minValue", -100.0)
+            .hasFieldOrPropertyWithValue("minWidth", 2.789)
+            .hasFieldOrPropertyWithValue("selected", false)
+            .hasFieldOrPropertyWithValue("selectionColor", Color.WHITE)
+            .hasFieldOrPropertyWithValue("tagColor", Color.TRANSPARENT)
+            .hasFieldOrPropertyWithValue("tagVisible", false)
+            .hasFieldOrPropertyWithValue("targetValue", 100.0)
+            .hasFieldOrPropertyWithValue("textColor", Color.WHITE)
+            .hasFieldOrPropertyWithValue("unit", (String) null)
+           ;
 
-        knob = KnobBuilder.create()
+        double min = -100;
+        double max =  100;
+        List<Stop> stops = Arrays.asList(
+            new Stop(( -120 - min ) / ( max - min ), new Color(252/255.0,  13/255.0, 27/255.0, 1.0)),
+            new Stop(( -100 - min ) / ( max - min ), new Color(252/255.0, 242/255.0, 17/255.0, 1.0)),
+            new Stop((  -80 - min ) / ( max - min ), new Color( 61/255.0, 216/255.0, 61/255.0, 1.0)),
+            new Stop((   80 - min ) / ( max - min ), new Color( 61/255.0, 216/255.0, 61/255.0, 1.0)),
+            new Stop((  100 - min ) / ( max - min ), new Color(252/255.0, 242/255.0, 17/255.0, 1.0)),
+            new Stop((  120 - min ) / ( max - min ), new Color(252/255.0,  13/255.0, 27/255.0, 1.0))
+        );
+        Knob knob3 = KnobBuilder.create()
                           .backgroundColor(Color.TRANSPARENT)
                           .decimals(-3)
+                          .gradientStops(stops)
 
-
-
-
-                          .minValue(-100)
-                          .maxValue(100)
+                          .minValue(min)
+                          .maxValue(max)
                           .currentValue(-200)
+                          .targetValue(-200)
                           .build();
 
-        assertThat(knob)
+        assertThat(knob3)
             .isNotNull()
             .hasFieldOrPropertyWithValue("backgroundColor", Color.TRANSPARENT)
             .hasFieldOrPropertyWithValue("background", Background.EMPTY)
@@ -155,8 +227,25 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", true)
             .hasFieldOrPropertyWithValue("currentValueColor", Knob.DEFAULT_CURRENT_VALUE_COLOR)
             .hasFieldOrPropertyWithValue("decimals", 0)
-            .hasFieldOrPropertyWithValue("minValue", -100.0)
-            .hasFieldOrPropertyWithValue("maxValue", 100.0)
+            .hasFieldOrPropertyWithValue("extremaVisible", false)
+            .hasFieldOrPropertyWithValue("gradientStops", FXCollections.observableList(stops))
+            .hasFieldOrPropertyWithValue("id", null)
+            .hasFieldOrPropertyWithValue("indicatorColor", Knob.DEFAULT_COLOR.darker())
+            .hasFieldOrPropertyWithValue("layoutX", 0.0)
+            .hasFieldOrPropertyWithValue("layoutY", 0.0)
+            .hasFieldOrPropertyWithValue("maxHeight", Knob.MAXIMUM_HEIGHT)
+            .hasFieldOrPropertyWithValue("maxValue", max)
+            .hasFieldOrPropertyWithValue("maxWidth", Knob.MAXIMUM_WIDTH)
+            .hasFieldOrPropertyWithValue("minHeight", Knob.MINIMUM_HEIGHT)
+            .hasFieldOrPropertyWithValue("minValue", min)
+            .hasFieldOrPropertyWithValue("minWidth", Knob.MINIMUM_WIDTH)
+            .hasFieldOrPropertyWithValue("selected", false)
+            .hasFieldOrPropertyWithValue("selectionColor", Color.WHITE)
+            .hasFieldOrPropertyWithValue("tagColor", Color.RED)
+            .hasFieldOrPropertyWithValue("tagVisible", false)
+            .hasFieldOrPropertyWithValue("targetValue", -100.0)
+            .hasFieldOrPropertyWithValue("textColor", Color.WHITE)
+            .hasFieldOrPropertyWithValue("unit", (String) null)
             ;
 
     }
@@ -260,18 +349,18 @@ public class KnobBuilderTest {
     }
 
     /**
-     * Test of extremaColor method, of class KnobBuilder.
+     * Test of extremaVisible method, of class KnobBuilder.
      */
     @Test
-    public void testExtremaColor() {
+    public void testExtremaVisible() {
 
-        Color value = Color.GOLDENROD;
-        KnobBuilder builder = KnobBuilder.create().extremaColor(value);
+        boolean value = true;
+        KnobBuilder builder = KnobBuilder.create().extremaVisible(value);
 
         assertThat(builder.properties)
-            .containsKey("extremaColor");
-        assertThat(builder.properties.get("extremaColor"))
-            .isExactlyInstanceOf(Color.class)
+            .containsKey("extremaVisible");
+        assertThat(builder.properties.get("extremaVisible"))
+            .isExactlyInstanceOf(Boolean.class)
             .isEqualTo(value);
 
     }
@@ -725,40 +814,6 @@ public class KnobBuilderTest {
     }
 
     /**
-     * Test of showExtrema method, of class KnobBuilder.
-     */
-    @Test
-    public void testShowExtrema() {
-
-        boolean value = true;
-        KnobBuilder builder = KnobBuilder.create().showExtrema(value);
-
-        assertThat(builder.properties)
-            .containsKey("showExtrema");
-        assertThat(builder.properties.get("showExtrema"))
-            .isExactlyInstanceOf(Boolean.class)
-            .isEqualTo(value);
-
-    }
-
-    /**
-     * Test of showTag method, of class KnobBuilder.
-     */
-    @Test
-    public void testShowTag() {
-
-        boolean value = true;
-        KnobBuilder builder = KnobBuilder.create().showTag(value);
-
-        assertThat(builder.properties)
-            .containsKey("showTag");
-        assertThat(builder.properties.get("showTag"))
-            .isExactlyInstanceOf(Boolean.class)
-            .isEqualTo(value);
-
-    }
-
-    /**
      * Test of selectionColor method, of class KnobBuilder.
      */
     @Test
@@ -788,6 +843,23 @@ public class KnobBuilderTest {
             .containsKey("tagColor");
         assertThat(builder.properties.get("tagColor"))
             .isExactlyInstanceOf(Color.class)
+            .isEqualTo(value);
+
+    }
+
+    /**
+     * Test of tagVisible method, of class KnobBuilder.
+     */
+    @Test
+    public void testTagVisible() {
+
+        boolean value = true;
+        KnobBuilder builder = KnobBuilder.create().tagVisible(value);
+
+        assertThat(builder.properties)
+            .containsKey("tagVisible");
+        assertThat(builder.properties.get("tagVisible"))
+            .isExactlyInstanceOf(Boolean.class)
             .isEqualTo(value);
 
     }
@@ -873,23 +945,6 @@ public class KnobBuilderTest {
             .containsKey("unit");
         assertThat(builder.properties.get("unit"))
             .isExactlyInstanceOf(String.class)
-            .isEqualTo(value);
-
-    }
-
-    /**
-     * Test of unitColor method, of class KnobBuilder.
-     */
-    @Test
-    public void testUnitColor() {
-
-        Color value = Color.GOLDENROD;
-        KnobBuilder builder = KnobBuilder.create().unitColor(value);
-
-        assertThat(builder.properties)
-            .containsKey("unitColor");
-        assertThat(builder.properties.get("unitColor"))
-            .isExactlyInstanceOf(Color.class)
             .isEqualTo(value);
 
     }

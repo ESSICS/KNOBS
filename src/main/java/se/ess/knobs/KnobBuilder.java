@@ -54,6 +54,7 @@ public class KnobBuilder {
 
     }
 
+    @SuppressWarnings( "unchecked" )
     public Knob build() {
 
         final Knob knob = new Knob();
@@ -85,8 +86,17 @@ public class KnobBuilder {
         if ( properties.containsKey("decimals") ) {
             knob.setDecimals((int) properties.get("decimals"));
         }
+        if ( properties.containsKey("extremaVisible") ) {
+            knob.setExtremaVisible((boolean) properties.get("extremaVisible"));
+        }
+        if ( properties.containsKey("gradientStops") ) {
+            knob.setGradientStops((List<Stop>) properties.get("gradientStops"));
+        }
         if ( properties.containsKey("id") ) {
             knob.setId((String) properties.get("id"));
+        }
+        if ( properties.containsKey("indicatorColor") ) {
+            knob.setIndicatorColor((Color) properties.get("indicatorColor"));
         }
         if ( properties.containsKey("layoutX") ) {
             knob.setLayoutX((double) properties.get("layoutX"));
@@ -120,14 +130,51 @@ public class KnobBuilder {
         if ( properties.containsKey("minWidth") ) {
             knob.setMinWidth((double) properties.get("minWidth"));
         }
+        if ( properties.containsKey("onAdjusted") ) {
+            knob.setOnAdjusted((EventHandler<KnobEvent>) properties.get("onAdjusted"));
+        }
+        if ( properties.containsKey("onAdjusting") ) {
+            knob.setOnAdjusting((EventHandler<KnobEvent>) properties.get("onAdjusting"));
+        }
+        if ( properties.containsKey("onTargetSet") ) {
+            knob.setOnTargetSet((EventHandler<KnobEvent>) properties.get("onTargetSet"));
+        }
         if ( properties.containsKey("opacity") ) {
             knob.setOpacity((double) properties.get("opacity"));
+        }
+        if ( properties.containsKey("padding") ) {
+            knob.setPadding((Insets) properties.get("padding"));
+        }
+        if ( properties.containsKey("prefHeight") ) {
+            knob.setPrefHeight((double) properties.get("prefHeight"));
+        }
+        if ( properties.containsKey("prefSize") ) {
+
+            Dimension2D size = (Dimension2D) properties.get("prefSize");
+
+            knob.setPrefSize(size.getWidth(), size.getHeight());
+
+        }
+        if ( properties.containsKey("prefWidth") ) {
+            knob.setPrefWidth((double) properties.get("prefWidth"));
         }
         if ( properties.containsKey("scaleX") ) {
             knob.setScaleX((double) properties.get("scaleX"));
         }
         if ( properties.containsKey("scaleY") ) {
             knob.setScaleY((double) properties.get("scaleY"));
+        }
+        if ( properties.containsKey("selected") ) {
+            knob.setSelected((boolean) properties.get("selected"));
+        }
+        if ( properties.containsKey("selectionColor") ) {
+            knob.setSelectionColor((Color) properties.get("selectionColor"));
+        }
+        if ( properties.containsKey("tagColor") ) {
+            knob.setTagColor((Color) properties.get("tagColor"));
+        }
+        if ( properties.containsKey("tagVisible") ) {
+            knob.setTagVisible((boolean) properties.get("tagVisible"));
         }
         if ( properties.containsKey("targetValue") ) {
             knob.setTargetValue((double) properties.get("targetValue"));
@@ -140,6 +187,9 @@ public class KnobBuilder {
         }
         if ( properties.containsKey("translateY") ) {
             knob.setTranslateY((double) properties.get("translateY"));
+        }
+        if ( properties.containsKey("unit") ) {
+            knob.setUnit((String) properties.get("unit"));
         }
 
         return knob;
@@ -186,9 +236,9 @@ public class KnobBuilder {
 
     }
 
-    public final KnobBuilder extremaColor( final Color color ) {
+    public final KnobBuilder extremaVisible( final boolean value ) {
 
-        properties.put("extremaColor", color);
+        properties.put("extremaVisible", value);
 
         return this;
 
@@ -406,25 +456,17 @@ public class KnobBuilder {
 
     }
 
-    public final KnobBuilder showExtrema( final boolean value ) {
-
-        properties.put("showExtrema", value);
-
-        return this;
-
-    }
-
-    public final KnobBuilder showTag( final boolean value ) {
-
-        properties.put("showTag", value);
-
-        return this;
-
-    }
-
     public final KnobBuilder tagColor( final Color color ) {
 
         properties.put("tagColor", color);
+
+        return this;
+
+    }
+
+    public final KnobBuilder tagVisible( final boolean value ) {
+
+        properties.put("tagVisible", value);
 
         return this;
 
@@ -465,14 +507,6 @@ public class KnobBuilder {
     public final KnobBuilder unit( final String unit ) {
 
         properties.put("unit", unit);
-
-        return this;
-
-    }
-
-    public final KnobBuilder unitColor( final Color color ) {
-
-        properties.put("unitColor", color);
 
         return this;
 

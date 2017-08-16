@@ -17,28 +17,54 @@
 package se.ess.knobs;
 
 
+import eu.hansolo.medusa.Fonts;
+import eu.hansolo.medusa.tools.ConicalGradient;
 import java.text.MessageFormat;
+import java.util.List;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
+import javafx.scene.CacheHint;
+import javafx.scene.Group;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.InnerShadow;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Stop;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
 
 import static se.ess.knobs.KnobEvent.ADJUSTED;
 import static se.ess.knobs.KnobEvent.ADJUSTING;
@@ -56,31 +82,74 @@ public class Knob extends Region {
     public static final Color               DEFAULT_COLOR = Color.rgb(66, 71, 79);
     public static final Color DEFAULT_CURRENT_VALUE_COLOR = Color.rgb( 0,  0,  0, 0.6);
 
+    public static final ObservableList<Stop> DEFAULT_STOPS = FXCollections.observableArrayList(
+        new Stop(0.0,   Color.rgb(135, 255, 190)),
+        new Stop(0.125, Color.rgb(254, 190, 106)),
+        new Stop(0.389, Color.rgb(252,  84,  68)),
+        new Stop(0.611, Color.rgb( 99, 195, 255)),
+        new Stop(1.0,   Color.rgb(125, 255, 190))
+    );
+    public static final ObservableList<Stop> TRANSPARENT_STOPS = FXCollections.observableArrayList(
+        new Stop(0.0,   Color.rgb(  0,   0,   0, 0)),
+        new Stop(1.0,   Color.rgb(255, 255, 255, 0))
+    );
+
+    public static final double MAXIMUM_HEIGHT   = 1024;
+    public static final double MAXIMUM_WIDTH    = 1024;
+    public static final double MINIMUM_HEIGHT   =   64;
+    public static final double MINIMUM_WIDTH    =   64;
+    public static final double PREFERRED_HEIGHT =  400;
+    public static final double PREFERRED_WIDTH  =  400;
+
     private static final double ANGLE_RANGE      =  280;
     private static final double BAR_START_ANGLE  = -130;
-    private static final double MAXIMUM_HEIGHT   = 1024;
-    private static final double MAXIMUM_WIDTH    = 1024;
-    private static final double MINIMUM_HEIGHT   =   64;
-    private static final double MINIMUM_WIDTH    =   64;
-    private static final double PREFERRED_HEIGHT =  250;
-    private static final double PREFERRED_WIDTH  =  250;
-    private static final double PROXIMITY_ERROR  = 0.01;
+    private static final double PROXIMITY_ERROR  = 0.001;
 
     private final KnobEvent  ADJUSTING_EVENT = new KnobEvent(this, null, ADJUSTING);
     private final KnobEvent   ADJUSTED_EVENT = new KnobEvent(this, null, ADJUSTED);
     private final KnobEvent TARGET_SET_EVENT = new KnobEvent(this, null, TARGET_SET);
 
-    private double angleStep;
-    private String formatString;
+    private Arc barArc;
+    private ConicalGradient barGradient;
     private Arc currentValueBarArc;
+    private DropShadow dropShadow;
+    private InnerShadow highlight;
+    private Circle indicator;
+    private DropShadow indicatorGlow;
+    private InnerShadow indicatorHighlight;
+    private InnerShadow indicatorInnerShadow;
     private Rotate indicatorRotate;
+    private InnerShadow innerShadow;
+    private Circle mainCircle;
+    private Pane pane;
+    private Shape ring;
     private double size;
+    private String format = "%.2f";
+    private Arc tagBarArc;
     private Text targetText;
     private Text text;
+    private Text textMax;
+    private Polygon textMaxTag;
+    private Text textMin;
+    private Polygon textMinTag;
+    private Text unitText;
 
     public Knob() {
         init();
         registerListeners();
+    }
+
+    /*
+     * ---- angleStep ----------------------------------------------------------
+     */
+    private final DoubleProperty angleStep = new SimpleDoubleProperty(this, "angleStep", ANGLE_RANGE / 100.0);
+
+    protected DoubleProperty angleStepProperty() {
+        return angleStep;
+    }
+
+    protected double getAngleStep() {
+        return angleStep.get();
     }
 
     /*
@@ -89,15 +158,7 @@ public class Knob extends Region {
     private final ObjectProperty<Color> backgroundColor = new SimpleObjectProperty<Color>(this, "backgroundColor", Color.TRANSPARENT) {
         @Override
         protected void invalidated() {
-
             set(get() == null ? Color.TRANSPARENT : get());
-
-            if ( Color.TRANSPARENT.equals(get()) ) {
-                setBackground(Background.EMPTY);
-            } else {
-                setBackground(new Background(new BackgroundFill(get(), CornerRadii.EMPTY, Insets.EMPTY)));
-            }
-
         }
     };
 
@@ -119,13 +180,7 @@ public class Knob extends Region {
     private final ObjectProperty<Color> color = new SimpleObjectProperty<Color>(this, "color", DEFAULT_COLOR) {
         @Override
         protected void invalidated() {
-
-            if ( get() == null ) {
-                set(get() == null ? DEFAULT_COLOR : get());
-            }
-
-            redraw();
-
+            set(get() == null ? DEFAULT_COLOR : get());
         }
     };
 
@@ -151,28 +206,12 @@ public class Knob extends Region {
             set(clamp(get(), getMinValue(), getMaxValue()));
 
             if ( close(get(), getTargetValue(), ( getMaxValue() - getMinValue() ) * PROXIMITY_ERROR) ) {
-
                 fireEvent(ADJUSTED_EVENT);
-
-                if ( !isCurrentValueAlwaysVisible() ) {
-                    targetText.setVisible(false);
-                    currentValueBarArc.setVisible(false);
-                }
-
             } else {
-
                 fireEvent(ADJUSTING_EVENT);
-
-                if ( !isCurrentValueAlwaysVisible() ) {
-                    targetText.setVisible(true);
-                    currentValueBarArc.setVisible(true);
-                }
-
             }
 
             setText(get());
-            updateCurrentValueBar(get());
-            redraw();
 
         }
     };
@@ -192,12 +231,7 @@ public class Knob extends Region {
     /*
      * ---- currentValueAlwaysVisible ------------------------------------------
      */
-    private final BooleanProperty currentValueAlwaysVisible = new SimpleBooleanProperty(this, "currentValueAlwaysVisible", true) {
-        @Override
-        protected void invalidated() {
-            redraw();
-        }
-    };
+    private final BooleanProperty currentValueAlwaysVisible = new SimpleBooleanProperty(this, "currentValueAlwaysVisible", true);
 
     public BooleanProperty currentValueAlwaysVisibleProperty() {
         return currentValueAlwaysVisible;
@@ -218,7 +252,6 @@ public class Knob extends Region {
         @Override
         protected void invalidated() {
             set(get() == null ? DEFAULT_CURRENT_VALUE_COLOR : get());
-            redraw();
         }
     };
 
@@ -243,11 +276,12 @@ public class Knob extends Region {
 
             set(clamp(get(), 0, 6));
 
-            formatString = MessageFormat.format("%.{0,number,###0}f", get());
+            format = MessageFormat.format("%.{0,number,###0}f", get());
 
             setText(getCurrentValue());
+            setTextMax(getMaxValue());
+            setTextMin(getMinValue());
             setTargetText(getTargetValue());
-//            redraw();
 
         }
     };
@@ -265,20 +299,85 @@ public class Knob extends Region {
     }
 
     /*
+     * ---- extremaVisible -----------------------------------------------------
+     */
+    private final BooleanProperty extremaVisible = new SimpleBooleanProperty(this, "extremaVisible", false);
+
+    public BooleanProperty extremaVisibleProperty() {
+        return extremaVisible;
+    }
+
+    public boolean isExtremaVisible() {
+        return extremaVisible.get();
+    }
+
+    public void setExtremaVisible( boolean extremaVisible ) {
+        this.extremaVisible.set(extremaVisible);
+    }
+
+    /*
+     * ---- gradientStops ------------------------------------------------------
+     */
+    private final ListProperty<Stop> gradientStops = new SimpleListProperty<Stop>(this, "gradientStops", DEFAULT_STOPS) {
+        @Override
+        protected void invalidated() {
+            set(get() == null ? DEFAULT_STOPS : get());
+        }
+    };
+
+    @SuppressWarnings( "ReturnOfCollectionOrArrayField" )
+    public ListProperty<Stop> gradientStopsProperty() {
+        return gradientStops;
+    }
+
+    public ObservableList<Stop> getGradientStops() {
+        return gradientStops.get();
+    }
+
+    public void setGradientStops( Stop... stops ) {
+        this.gradientStops.set(FXCollections.observableArrayList(stops));
+    }
+
+    public void setGradientStops( List<Stop> gradientStops ) {
+        this.gradientStops.set(gradientStops != null ? FXCollections.observableList(gradientStops) : FXCollections.emptyObservableList());
+    }
+
+    public void setGradientStops( ObservableList<Stop> gradientStops ) {
+        this.gradientStops.set(gradientStops);
+    }
+
+    /*
+     * ---- indicatorColor -----------------------------------------------------
+     */
+    private final ObjectProperty<Color> indicatorColor = new SimpleObjectProperty<Color>(this, "indicatorColor", DEFAULT_COLOR.darker()) {
+        @Override
+        protected void invalidated() {
+            set(get() == null ? DEFAULT_COLOR.darker() : get());
+        }
+    };
+
+    public ObjectProperty<Color> indicatorColorProperty() {
+        return indicatorColor;
+    }
+
+    public Color getIndicatorColor() {
+        return indicatorColor.get();
+    }
+
+    public void setIndicatorColor( Color indicatorColor ) {
+        this.indicatorColor.set(indicatorColor);
+    }
+
+    /*
      * ---- maxValue -----------------------------------------------------------
      */
     private final DoubleProperty maxValue = new SimpleDoubleProperty(this, "maxValue", 100) {
         @Override
         protected void invalidated() {
-
             set(clamp(get(), getMinValue(), Double.MAX_VALUE));
+            setTextMax(get());
             setCurrentValue(clamp(getCurrentValue(), getMinValue(), get()));
-
-            angleStep = ANGLE_RANGE / ( get() - getMinValue() );
-
-            updateCurrentValueBar(get());
-            redraw();
-
+            setTargetValue(clamp(getCurrentValue(), getMinValue(), get()));
         }
     };
 
@@ -300,15 +399,10 @@ public class Knob extends Region {
     private final DoubleProperty minValue = new SimpleDoubleProperty(this, "minValue", 0) {
         @Override
         protected void invalidated() {
-
             set(clamp(get(), - Double.MAX_VALUE, getMaxValue()));
+            setTextMin(get());
             setCurrentValue(clamp(getCurrentValue(), get(), getMaxValue()));
-
-            angleStep = ANGLE_RANGE / ( getMaxValue() - get() );
-
-            updateCurrentValueBar(get());
-            redraw();
-
+            setTargetValue(clamp(getCurrentValue(), get(), getMaxValue()));
         }
     };
 
@@ -325,38 +419,99 @@ public class Knob extends Region {
     }
 
     /*
+     * ---- selected -----------------------------------------------------------
+     */
+    private final BooleanProperty selected = new SimpleBooleanProperty(this, "selected", false);
+
+    public BooleanProperty selectedProperty() {
+        return selected;
+    }
+
+    public boolean isSelected() {
+        return selected.get();
+    }
+
+    public void setSelected( boolean selected ) {
+        this.selected.set(selected);
+    }
+
+    /*
+     * ---- selectionColor -----------------------------------------------------
+     */
+    private final ObjectProperty<Color> selectionColor = new SimpleObjectProperty<Color>(this, "selectionColor", Color.WHITE) {
+        @Override
+        protected void invalidated() {
+            set(get() == null ? Color.WHITE : get());
+        }
+    };
+
+    public ObjectProperty<Color> selectionColorProperty() {
+        return selectionColor;
+    }
+
+    public Color getSelectionColor() {
+        return selectionColor.get();
+    }
+
+    public void setSelectionColor( Color selectionColor ) {
+        this.selectionColor.set(selectionColor);
+    }
+
+    /*
+     * ---- tagColor -----------------------------------------------------------
+     */
+    private final ObjectProperty<Color> tagColor = new SimpleObjectProperty<Color>(this, "tagColor", Color.RED) {
+        @Override
+        protected void invalidated() {
+            set(get() == null ? Color.TRANSPARENT : get());
+        }
+    };
+
+    public ObjectProperty<Color> tagColorProperty() {
+        return tagColor;
+    }
+
+    public Color getTagColor() {
+        return tagColor.get();
+    }
+
+    public void setTagColor( Color tagColor ) {
+        this.tagColor.set(tagColor);
+    }
+
+    /*
+     * ---- tagVisible ---------------------------------------------------------
+     */
+    private final BooleanProperty tagVisible = new SimpleBooleanProperty(this, "tagVisible", false);
+
+    public BooleanProperty tagVisibleProperty() {
+        return tagVisible;
+    }
+
+    public boolean isTagVisible() {
+        return tagVisible.get();
+    }
+
+    public void setTagVisible( boolean tagVisible ) {
+        this.tagVisible.set(tagVisible);
+    }
+
+    /*
      * ---- targetValue --------------------------------------------------------
      */
     private final DoubleProperty targetValue = new SimpleDoubleProperty(this, "targetValue", 0) {
         @Override
         protected void invalidated() {
 
-
             set(clamp(get(), getMinValue(), getMaxValue()));
 
             if ( close(getCurrentValue(), get(), ( getMaxValue() - getMinValue() ) * PROXIMITY_ERROR) ) {
-
                 fireEvent(ADJUSTED_EVENT);
-
-                if ( !isCurrentValueAlwaysVisible() ) {
-                    targetText.setVisible(false);
-                    currentValueBarArc.setVisible(false);
-                }
-
             } else {
-
                 fireEvent(ADJUSTING_EVENT);
-
-                if ( !isCurrentValueAlwaysVisible() ) {
-                    targetText.setVisible(true);
-                    currentValueBarArc.setVisible(true);
-                }
-
             }
 
             setTargetText(get());
-            updateIndicatorPosition(get());
-            redraw();
 
         }
     };
@@ -379,14 +534,7 @@ public class Knob extends Region {
     private final ObjectProperty<Color> textColor = new SimpleObjectProperty<Color>(this, "textColor", Color.WHITE) {
         @Override
         protected void invalidated() {
-
             set(get() == null ? Color.WHITE : get());
-
-            text.setFill(get());
-            targetText.setFill(get().darker());
-
-//            redraw();
-
         }
     };
 
@@ -402,22 +550,61 @@ public class Knob extends Region {
         this.textColor.set(textColor);
     }
 
+   /*
+     * ---- unit ---------------------------------------------------------------
+     */
+    private final StringProperty unit = new SimpleStringProperty(this, "unit", null) {
+        @Override
+        protected void invalidated() {
+            setUnitText(get());
+        }
+    };
 
+    public StringProperty unitProperty() {
+        return unit;
+    }
 
+    public String getUnit() {
+        return unit.get();
+    }
 
+    public void setUnit( String unit ) {
+        this.unit.set(unit);
+    }
 
-
-
-
-
-
-    /*
+     /*
      * -------------------------------------------------------------------------
      */
+    public void removeOnAdjusted( final EventHandler<KnobEvent> handler ) {
+        removeEventHandler(KnobEvent.ADJUSTED, handler);
+    }
+
+    public void removeOnAdjusting( final EventHandler<KnobEvent> handler ) {
+        removeEventHandler(KnobEvent.ADJUSTING, handler);
+    }
+
+    public void removeOnTargetSet( final EventHandler<KnobEvent> handler ) {
+        removeEventHandler(KnobEvent.TARGET_SET, handler);
+    }
+
+    public void setOnAdjusted( final EventHandler<KnobEvent> handler ) {
+        addEventHandler(KnobEvent.ADJUSTED, handler);
+    }
+
+    public void setOnAdjusting( final EventHandler<KnobEvent> handler ) {
+        addEventHandler(KnobEvent.ADJUSTING, handler);
+    }
+
+    public void setOnTargetSet( final EventHandler<KnobEvent> handler ) {
+        addEventHandler(KnobEvent.TARGET_SET, handler);
+    }
+
     @SuppressWarnings( "AssignmentToMethodParameter" )
     private void adjustTextSize( final Text textComponent, final double availableWidth, double fontSize ) {
 
         final String fontName = textComponent.getFont().getName();
+
+        textComponent.setFont(new Font(fontName, fontSize));
 
         while ( textComponent.getLayoutBounds().getWidth() > availableWidth && fontSize > 0 ) {
 
@@ -497,69 +684,348 @@ public class Knob extends Region {
             getMaxHeight() > 0 ? getMaxHeight() : MAXIMUM_HEIGHT
         );
 
-        Color backColor = getBackgroundColor();
+        angleStepProperty().bind(Bindings.divide(ANGLE_RANGE, Bindings.subtract(maxValueProperty(), minValueProperty())));
+        backgroundProperty().bind(Bindings.createObjectBinding(
+            () -> Color.TRANSPARENT.equals(getBackgroundColor())
+                  ? Background.EMPTY
+                  : new Background(new BackgroundFill(getBackgroundColor(), CornerRadii.EMPTY, Insets.EMPTY)),
+            backgroundColorProperty()
+        ));
 
-        if ( backColor == null || Color.TRANSPARENT.equals(backColor) ) {
-            setBackground(Background.EMPTY);
-        } else {
-            setBackground(new Background(new BackgroundFill(backColor, CornerRadii.EMPTY, Insets.EMPTY)));
-        }
+        dropShadow  = new DropShadow (BlurType.TWO_PASS_BOX, Color.rgb(  0,   0,   0, 0.65), PREFERRED_WIDTH * 0.016, 0.0, 0,  PREFERRED_WIDTH * 0.028);
+        highlight   = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(255, 255, 255, 0.20), PREFERRED_WIDTH * 0.008, 0.0, 0,  PREFERRED_WIDTH * 0.008);
+        innerShadow = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(  0,   0,   0, 0.20), PREFERRED_WIDTH * 0.008, 0.0, 0, -PREFERRED_WIDTH * 0.008);
 
-        formatString = MessageFormat.format("%.{0,number,###0}f", getDecimals());
-        angleStep    = ANGLE_RANGE / ( getMaxValue() - getMinValue() );
+        highlight.setInput(innerShadow);
+        dropShadow.setInput(highlight);
 
+        barGradient = new ConicalGradient(getGradientStops());
+        barArc      = new Arc(PREFERRED_WIDTH * 0.5, PREFERRED_HEIGHT * 0.5, PREFERRED_WIDTH * 0.46, PREFERRED_HEIGHT * 0.46, BAR_START_ANGLE, 0);
 
+        barArc.setType(ArcType.OPEN);
+        barArc.setStrokeLineCap(StrokeLineCap.ROUND);
+        barArc.setFill(null);
+        barArc.setStroke(barGradient.getImagePattern(new Rectangle(0, 0, PREFERRED_WIDTH, PREFERRED_HEIGHT)));
+
+        BooleanBinding currentValueVisibleBinding = Bindings.createBooleanBinding(
+            () -> isCurrentValueAlwaysVisible() || !close(getCurrentValue(), getTargetValue(), ( getMaxValue() - getMinValue() ) * PROXIMITY_ERROR),
+            currentValueAlwaysVisibleProperty(),
+            currentValueProperty(),
+            targetValueProperty(),
+            maxValueProperty(),
+            minValueProperty()
+        );
 
         currentValueBarArc = new Arc(PREFERRED_WIDTH * 0.5, PREFERRED_HEIGHT * 0.5, PREFERRED_WIDTH * 0.46, PREFERRED_HEIGHT * 0.46, BAR_START_ANGLE, 0);
 
         currentValueBarArc.setType(ArcType.OPEN);
         currentValueBarArc.setStrokeLineCap(StrokeLineCap.ROUND);
         currentValueBarArc.setFill(null);
-        currentValueBarArc.setStroke(getCurrentValueColor());
-        currentValueBarArc.setVisible(isCurrentValueAlwaysVisible() || close(getCurrentValue(), getTargetValue(), ( getMaxValue() - getMinValue() ) * PROXIMITY_ERROR));
+        currentValueBarArc.strokeProperty().bind(currentValueColorProperty());
+        currentValueBarArc.lengthProperty().bind(Bindings.multiply(angleStepProperty(), Bindings.subtract(minValueProperty(), currentValueProperty())));
+        currentValueBarArc.visibleProperty().bind(currentValueVisibleBinding);
 
-        text = new Text(String.format(formatString, getCurrentValue()));
+        double center = PREFERRED_WIDTH * 0.5;
 
-        text.setFill(getTextColor());
+        ring = Shape.subtract(
+            new Circle(center, center, PREFERRED_WIDTH * 0.42),
+            new Circle(center, center, PREFERRED_WIDTH * 0.3)
+        );
+
+        ring.fillProperty().bind(colorProperty());
+        ring.setEffect(dropShadow);
+
+        mainCircle = new Circle();
+
+        mainCircle.fillProperty().bind(Bindings.createObjectBinding(() -> getColor().darker().darker(), colorProperty()));
+
+        text = new Text(String.format(format, getCurrentValue()));
+
+        text.fillProperty().bind(textColorProperty());
         text.setTextOrigin(VPos.CENTER);
 
-        targetText = new Text(String.format(formatString, getTargetValue()));
+        targetText = new Text(String.format(format, getTargetValue()));
 
-        targetText.setFill(getTextColor().darker());
+        targetText.fillProperty().bind(Bindings.createObjectBinding(() -> getTextColor().darker(), textColorProperty()));
         targetText.setTextOrigin(VPos.CENTER);
-        targetText.setVisible(isCurrentValueAlwaysVisible() || close(getCurrentValue(), getTargetValue(), ( getMaxValue() - getMinValue() ) * PROXIMITY_ERROR));
+        targetText.visibleProperty().bind(currentValueVisibleBinding);
 
+        unitText = new Text(getUnit());
 
+        unitText.fillProperty().bind(Bindings.createObjectBinding(() -> getTextColor().darker(), textColorProperty()));
+        unitText.setTextOrigin(VPos.CENTER);
 
+        textMinTag = new Polygon(0.0, 0.7, 0.3, 0.7, 0.4, 0.5, 0.4, 0.9, 0.0, 0.9);
 
-    }
+        textMinTag.fillProperty().bind(Bindings.createObjectBinding(() -> getColor().darker().darker().darker(), colorProperty()));
+        textMinTag.visibleProperty().bind(extremaVisibleProperty());
 
-    private void redraw() {
-        //  TODO: CR: To be implemented
+        textMin = new Text(String.format(format, getMinValue()));
+
+        textMin.fillProperty().bind(Bindings.createObjectBinding(() -> getTextColor().darker(), textColorProperty()));
+        textMin.setTextOrigin(VPos.CENTER);
+        textMin.visibleProperty().bind(extremaVisibleProperty());
+
+        textMaxTag = new Polygon(0.0, 0.7, 0.3, 0.7, 0.4, 0.5, 0.4, 0.9, 0.0, 0.9);
+
+        textMaxTag.fillProperty().bind(Bindings.createObjectBinding(() -> getColor().darker().darker().darker(), colorProperty()));
+        textMaxTag.visibleProperty().bind(extremaVisibleProperty());
+
+        textMax = new Text(String.format(format, getMaxValue()));
+
+        textMax.fillProperty().bind(Bindings.createObjectBinding(() -> getTextColor().darker(), textColorProperty()));
+        textMax.setTextOrigin(VPos.CENTER);
+        textMax.visibleProperty().bind(extremaVisibleProperty());
+
+        tagBarArc = new Arc(PREFERRED_WIDTH * 0.5, PREFERRED_HEIGHT * 0.5, PREFERRED_WIDTH * 0.46, PREFERRED_HEIGHT * 0.46, BAR_START_ANGLE + 15, 50);
+
+        tagBarArc.setType(ArcType.OPEN);
+        tagBarArc.setStrokeLineCap(StrokeLineCap.ROUND);
+        tagBarArc.setFill(null);
+        tagBarArc.strokeProperty().bind(tagColorProperty());
+        tagBarArc.visibleProperty().bind(tagVisibleProperty());
+
+        indicatorRotate      = new Rotate(-ANGLE_RANGE *  0.5, center, center);
+        indicatorGlow        = new DropShadow (BlurType.TWO_PASS_BOX, getIndicatorColor(),            PREFERRED_WIDTH * 0.020, 0.0, 0, 0);
+        indicatorInnerShadow = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(  0,   0,   0, 0.50), PREFERRED_WIDTH * 0.008, 0.0, 0,  PREFERRED_WIDTH * 0.008);
+        indicatorHighlight   = new InnerShadow(BlurType.TWO_PASS_BOX, Color.rgb(255, 255, 255, 0.35), PREFERRED_WIDTH * 0.008, 0.0, 0, -PREFERRED_WIDTH * 0.008);
+
+        indicatorRotate.angleProperty().bind(Bindings.subtract(Bindings.multiply(Bindings.subtract(targetValueProperty(), minValueProperty()), angleStepProperty()), ANGLE_RANGE * 0.5));
+        indicatorGlow.colorProperty().bind(selectionColorProperty());
+        indicatorHighlight.setInput(indicatorInnerShadow);
+
+        indicator = new Circle();
+
+        indicator.effectProperty().bind(Bindings.createObjectBinding(
+            () -> isSelected() ? indicatorGlow : null,
+            selectionColorProperty(),
+            selectedProperty()
+        ));
+        indicator.fillProperty().bind(Bindings.createObjectBinding(
+            () -> isSelected() ? getSelectionColor() : getIndicatorColor(),
+            colorProperty(),
+            indicatorColorProperty(),
+            selectionColorProperty(),
+            selectedProperty()
+        ));
+        indicator.strokeProperty().bind(Bindings.createObjectBinding(
+            () -> isSelected() ? getSelectionColor().darker().darker() : getIndicatorColor().darker().darker(),
+            colorProperty(),
+            indicatorColorProperty(),
+            selectionColorProperty(),
+            selectedProperty()
+        ));
+        indicator.setMouseTransparent(true);
+        indicator.getTransforms().add(indicatorRotate);
+
+        Group indicatorGroup = new Group(indicator);
+
+        indicatorGroup.setEffect(indicatorHighlight);
+
+        pane = new Pane(barArc, currentValueBarArc, ring, mainCircle, text, targetText, unitText, textMinTag, textMin, textMaxTag, textMax, tagBarArc, indicatorGroup);
+
+        pane.setPrefSize(PREFERRED_HEIGHT, PREFERRED_HEIGHT);
+        pane.backgroundProperty().bind(Bindings.createObjectBinding(
+            () -> new Background(new BackgroundFill(getColor().darker(), new CornerRadii(1024), Insets.EMPTY)),
+            colorProperty()
+        ));
+        pane.setEffect(highlight);
+
+        getChildren().setAll(pane);
+
     }
 
     private void registerListeners() {
-        //  TODO: CR: To be implemented
+        widthProperty().addListener(w -> resize());
+        heightProperty().addListener(h -> resize());
+        disabledProperty().addListener(d -> setOpacity(isDisabled() ? 0.4 : 1.0));
+        ring.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
+            if ( !isDisabled() ) {
+                touchRotate(e.getSceneX(), e.getSceneY());
+            }
+        });
+        ring.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> { 
+            if (! isDisabled() ) {
+                touchRotate(e.getSceneX(), e.getSceneY());
+            }
+        });
+        ring.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> { 
+            if ( !isDisabled() ) {
+                fireEvent(TARGET_SET_EVENT);
+            }
+        });
+    }
+
+    private void resize() {
+
+        double width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
+        double height = getHeight() - getInsets().getTop() - getInsets().getBottom();
+
+        size = width < height ? width : height;
+
+        if ( width > 0 && height > 0 ) {
+
+            pane.setMaxSize(size, size);
+            pane.setPrefSize(size, size);
+            pane.relocate(( getWidth() - size ) * 0.5, ( getHeight() - size ) * 0.5);
+
+            barArc.setCache(false);
+            barArc.setCenterX(size * 0.5);
+            barArc.setCenterY(size * 0.5);
+            barArc.setRadiusX(size * 0.46);
+            barArc.setRadiusY(size * 0.46);
+            barArc.setStrokeWidth(size * 0.04);
+            barArc.setStroke(barGradient.getImagePattern(new Rectangle(0, 0, size, size)));
+            barArc.setLength(-( getMaxValue() - getMinValue() ) * getAngleStep());
+            barArc.setCache(true);
+            barArc.setCacheHint(CacheHint.SPEED);
+
+            currentValueBarArc.setCenterX(size * 0.5);
+            currentValueBarArc.setCenterY(size * 0.5);
+            currentValueBarArc.setRadiusX(size * 0.46);
+            currentValueBarArc.setRadiusY(size * 0.46);
+            currentValueBarArc.setStrokeWidth(size * 0.03);
+
+            double shadowRadius = clamp(1.0, 2.0, size * 0.004);
+
+            dropShadow.setRadius(shadowRadius);
+            dropShadow.setOffsetY(shadowRadius);
+            highlight.setRadius(shadowRadius);
+            highlight.setOffsetY(shadowRadius);
+            innerShadow.setRadius(shadowRadius);
+            innerShadow.setOffsetY(-shadowRadius);
+
+            double center      = size * 0.5;
+            double scaleFactor = size / PREFERRED_WIDTH;
+
+            ring.setCache(false);
+            ring.getTransforms().setAll(new Scale(scaleFactor, scaleFactor, 0, 0));
+            ring.setCache(true);
+            ring.setCacheHint(CacheHint.SPEED);
+
+            mainCircle.setCache(false);
+            mainCircle.setRadius(size * 0.3);
+            mainCircle.setCenterX(center);
+            mainCircle.setCenterY(center);
+            mainCircle.setCache(true);
+            mainCircle.setCacheHint(CacheHint.SPEED);
+
+            text.setFont(Fonts.robotoMedium(size * 0.216));
+            text.relocate(( size - text.getLayoutBounds().getWidth() ) * 0.5, size * 0.33);
+
+            targetText.setFont(Fonts.robotoLight(size * 0.082));
+            targetText.relocate(( size - targetText.getLayoutBounds().getWidth() ) * 0.5, size * 0.25);
+
+            unitText.setFont(Fonts.robotoLight(size * 0.082));
+            unitText.relocate(( size - unitText.getLayoutBounds().getWidth() ) * 0.5, size * 0.64);
+            
+            textMinTag.getPoints().set(0, size * 0.0 );     textMinTag.getPoints().set(1, size * 0.886);
+            textMinTag.getPoints().set(2, size * 0.19);     textMinTag.getPoints().set(3, size * 0.886);
+            textMinTag.getPoints().set(4, size * 0.21);     textMinTag.getPoints().set(5, size * 0.856);
+            textMinTag.getPoints().set(6, size * 0.21);     textMinTag.getPoints().set(7, size * 0.946);
+            textMinTag.getPoints().set(8, size * 0.0 );     textMinTag.getPoints().set(9, size * 0.946);
+
+            textMin.setFont(Fonts.robotoLight(size * 0.04));
+            textMin.relocate(size * 0.007, size * 0.891);
+
+            setTextMin(getMinValue());
+
+            textMaxTag.getPoints().set(0, size * 1.0 );     textMaxTag.getPoints().set(1, size * 0.886);
+            textMaxTag.getPoints().set(2, size * 0.81);     textMaxTag.getPoints().set(3, size * 0.886);
+            textMaxTag.getPoints().set(4, size * 0.79);     textMaxTag.getPoints().set(5, size * 0.856);
+            textMaxTag.getPoints().set(6, size * 0.79);     textMaxTag.getPoints().set(7, size * 0.946);
+            textMaxTag.getPoints().set(8, size * 1.0 );     textMaxTag.getPoints().set(9, size * 0.946);
+
+            textMax.setFont(Fonts.robotoLight(size * 0.04));
+            textMax.relocate(size * 0.797, size * 0.891);
+
+            setTextMax(getMaxValue());
+
+            tagBarArc.setCenterX(size * 0.5);
+            tagBarArc.setCenterY(size * 0.5);
+            tagBarArc.setRadiusX(size * 0.46);
+            tagBarArc.setRadiusY(size * 0.46);
+            tagBarArc.setStrokeWidth(size * 0.03);
+
+            indicatorGlow.setRadius(size * 0.02);
+            indicatorInnerShadow.setRadius(size * 0.008);
+            indicatorInnerShadow.setOffsetY(size * 0.006);
+            indicatorHighlight.setRadius(size * 0.008);
+            indicatorHighlight.setOffsetY(-size * 0.004);
+
+            indicator.setRadius(size * 0.032);
+            indicator.setCenterX(center);
+            indicator.setCenterY(size * 0.148);
+
+            indicatorRotate.setPivotX(center);
+            indicatorRotate.setPivotY(center);
+
+        }
+
     }
 
     private void setText( final double value ) {
-        text.setText(String.format(formatString, value));
-        adjustTextSize(text, size * 0.48, size * 0.216);
-        text.setLayoutX(( size - text.getLayoutBounds().getWidth() ) * 0.5);
+        if ( text != null ) {
+            text.setText(String.format(format, value));
+            adjustTextSize(text, size * 0.48, size * 0.216);
+            text.setLayoutX(( size - text.getLayoutBounds().getWidth() ) * 0.5);
+        }
+    }
+
+    private void setTextMax( final double value ) {
+        if ( textMax != null ) {
+            textMax.setText(String.format(format, value));
+            adjustTextSize(textMax, size * 0.196, size * 0.04);
+            textMax.setLayoutX(size * 0.797 + ( size * 0.196 - textMax.getLayoutBounds().getWidth() ) * 0.5);
+        }
+    }
+
+    private void setTextMin( final double value ) {
+        if ( textMin != null ) {
+            textMin.setText(String.format(format, value));
+            adjustTextSize(textMin, size * 0.196, size * 0.04);
+            textMin.setLayoutX(size * 0.007 + ( size * 0.196 - textMin.getLayoutBounds().getWidth() ) * 0.5);
+        }
     }
 
     private void setTargetText( final double value ) {
-        targetText.setText(String.format(formatString, value));
-        adjustTextSize(targetText, size * 0.24, size * 0.216);
-        targetText.setLayoutX(( size - targetText.getLayoutBounds().getWidth() ) * 0.5);
+        if ( targetText != null ) {
+            targetText.setText(String.format(format, value));
+            adjustTextSize(targetText, size * 0.30, size * 0.082);
+            targetText.setLayoutX(( size - targetText.getLayoutBounds().getWidth() ) * 0.5);
+        }
     }
 
-    private void updateCurrentValueBar( final double value ) {
-        currentValueBarArc.setLength(- ( value - getMinValue() ) * angleStep);
+    private void setUnitText( final String value ) {
+        if ( unitText != null ) {
+            unitText.setText(value);
+            adjustTextSize(unitText, size * 0.30, size * 0.082);
+            unitText.setLayoutX(( size - unitText.getLayoutBounds().getWidth() ) * 0.5);
+        }
     }
 
-    private void updateIndicatorPosition( final double value ) {
-        indicatorRotate.setAngle(( value - getMinValue() ) * angleStep - ANGLE_RANGE * 0.5);
+    private void touchRotate( final double X, final double Y ) {
+
+        Point2D p      = sceneToLocal(X, Y);
+        double  deltaX = p.getX() - ( pane.getLayoutX() + size * 0.5 );
+        double  deltaY = p.getY() - ( pane.getLayoutY() + size * 0.5 );
+        double  radius = Math.sqrt(( deltaX * deltaX ) + ( deltaY * deltaY ));
+        double  nx     = deltaX / radius;
+        double  ny     = deltaY / radius;
+        double  theta  = Math.atan2(ny, nx);
+
+        theta = Double.compare(theta, 0.0) >= 0 ? Math.toDegrees(theta) : Math.toDegrees(( theta )) + 360.0;
+
+        double angle = ( theta + 230 ) % 360;
+
+        if ( angle > 320 && angle < 360 ) {
+            angle = 0;
+        } else if ( angle <= 320 && angle > ANGLE_RANGE ) {
+            angle = ANGLE_RANGE;
+        }
+
+        setTargetValue(angle / getAngleStep() + getMinValue());
+
     }
 
 }
