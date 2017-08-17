@@ -55,4 +55,9 @@ public class KnobEvaluator extends Application implements Initializable {
 
     }
 
+    @Override
+    public void stop() throws Exception {
+        System.exit(0);
+    }
+
 }

@@ -26,8 +26,12 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -46,15 +50,20 @@ public class KnobController implements Initializable {
 
     private static final Logger LOGGER = Logger.getLogger(KnobController.class.getName());
 
-    @FXML
-    private FlowPane knobContainer;
-    @FXML
-    private PropertySheet propertySheet;
+    @FXML private FlowPane knobContainer;
+    @FXML private PropertySheet propertySheet;
+    private final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
+    private volatile boolean updateCurrentValue = false;
 
     @Override
     public void initialize( URL location, ResourceBundle resources ) {
 
         Knob knob = KnobBuilder.create()
+                        .onAdjusted(e -> LOGGER.info(MessageFormat.format("Current value reached target: {0}", ((Knob) e.getSource()).getCurrentValue())))
+                        .onTargetSet(e -> { 
+                            LOGGER.info(MessageFormat.format("Target changed: {0}", ((Knob) e.getSource()).getTargetValue()));
+                            updateCurrentValue = true;
+                        })
                         .build();
 
         knobContainer.getChildren().add(knob);
@@ -87,6 +96,39 @@ public class KnobController implements Initializable {
         }
 
         propertySheet.setMode(PropertySheet.Mode.CATEGORY);
+
+        timer.scheduleAtFixedRate(() -> {
+            if ( updateCurrentValue ) {
+
+                double step = ( knob.getMaxValue() - knob.getMinValue() ) / 234;
+                double cValue = knob.getCurrentValue();
+                double tValue = knob.getTargetValue();
+
+                if ( cValue < tValue ) {
+                    Platform.runLater(() -> {
+                        if ( ( tValue - cValue ) > step ) {
+                            knob.setCurrentValue(cValue + step);
+                        } else {
+                            knob.setCurrentValue(tValue);
+                            updateCurrentValue = false;
+                        }
+                    });
+                } else if ( cValue > tValue ) {
+                    Platform.runLater(() -> {
+                        if ( ( cValue - tValue ) > step ) {
+                            knob.setCurrentValue(cValue - step);
+                        } else {
+                            knob.setCurrentValue(tValue);
+                            updateCurrentValue = false;
+                        }
+                    });
+                }
+
+            }},
+            5000,
+            200,
+            TimeUnit.MILLISECONDS
+        );
 
     }
 
