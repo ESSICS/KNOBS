@@ -44,7 +44,7 @@ public class KnobEvaluator extends Application implements Initializable {
     @Override
     public void start( Stage stage ) throws Exception {
 
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/KnobEvaluator.fxml"));
+        Parent root = FXMLLoader.load(KnobEvaluator.class.getResource("/fxml/KnobController.fxml"));
         Scene scene = new Scene(root);
 
         scene.getStylesheets().add("/styles/dark-style.css");

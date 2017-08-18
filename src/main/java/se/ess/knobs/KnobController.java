@@ -58,6 +58,8 @@ public class KnobController implements Initializable {
     @Override
     public void initialize( URL location, ResourceBundle resources ) {
 
+        propertySheet.setPropertyEditorFactory(new KnobPropertyEditorFactory());
+
         Knob knob = KnobBuilder.create()
                         .onAdjusted(e -> LOGGER.info(MessageFormat.format("Current value reached target: {0}", ((Knob) e.getSource()).getCurrentValue())))
                         .onTargetSet(e -> { 
