@@ -93,12 +93,24 @@ public class StopListEditorController implements Initializable {
         Stop stop = getNewStop(null);
 
         if ( stop != null ) {
+
+            boolean done = false;
+
             for ( int i = 0; i < stopsTable.getItems().size(); i++ ) {
                 if ( stopsTable.getItems().get(i).getOffset() > stop.getOffset() ) {
+
+                    done = true;
+
                     stopsTable.getItems().add(i, stop);
                     break;
+
                 }
             }
+
+            if ( !done ) {
+                stopsTable.getItems().add(stop);
+            }
+
         }
 
     }
@@ -114,11 +126,21 @@ public class StopListEditorController implements Initializable {
 
             stopsTable.getItems().remove(index);
 
+            boolean done = false;
+
             for ( int i = 0; i < stopsTable.getItems().size(); i++ ) {
                 if ( stopsTable.getItems().get(i).getOffset() > stop.getOffset() ) {
+
+                    done = true;
+
                     stopsTable.getItems().add(i, stop);
                     break;
+
                 }
+            }
+
+            if ( !done ) {
+                stopsTable.getItems().add(stop);
             }
 
         }
