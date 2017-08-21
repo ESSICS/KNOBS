@@ -20,7 +20,12 @@ package se.ess.knobs;
 import eu.hansolo.medusa.Fonts;
 import eu.hansolo.medusa.tools.ConicalGradient;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -83,11 +88,9 @@ public class Knob extends Region {
     public static final Color DEFAULT_CURRENT_VALUE_COLOR = Color.rgb( 0,  0,  0, 0.6);
 
     public static final ObservableList<Stop> DEFAULT_STOPS = FXCollections.observableArrayList(
-        new Stop(0.0,   Color.rgb(135, 255, 190)),
-        new Stop(0.125, Color.rgb(254, 190, 106)),
-        new Stop(0.389, Color.rgb(252,  84,  68)),
-        new Stop(0.611, Color.rgb( 99, 195, 255)),
-        new Stop(1.0,   Color.rgb(125, 255, 190))
+        new Stop(0.0,   Color.RED),
+        new Stop(0.5,   Color.YELLOW),
+        new Stop(1.0,   Color.GREEN)
     );
     public static final ObservableList<Stop> TRANSPARENT_STOPS = FXCollections.observableArrayList(
         new Stop(0.0,   Color.rgb(  0,   0,   0, 0)),
@@ -321,7 +324,13 @@ public class Knob extends Region {
     private final ListProperty<Stop> gradientStops = new SimpleListProperty<Stop>(this, "gradientStops", DEFAULT_STOPS) {
         @Override
         protected void invalidated() {
+
             set(get() == null ? DEFAULT_STOPS : get());
+
+            barGradient = new ConicalGradient(reorderStops(get()));
+
+            barArc.setStroke(barGradient.getImagePattern(new Rectangle(0, 0, PREFERRED_WIDTH, PREFERRED_HEIGHT)));
+
         }
     };
 
@@ -699,7 +708,7 @@ public class Knob extends Region {
         highlight.setInput(innerShadow);
         dropShadow.setInput(highlight);
 
-        barGradient = new ConicalGradient(getGradientStops());
+        barGradient = new ConicalGradient(reorderStops(getGradientStops()));
         barArc      = new Arc(PREFERRED_WIDTH * 0.5, PREFERRED_HEIGHT * 0.5, PREFERRED_WIDTH * 0.46, PREFERRED_HEIGHT * 0.46, BAR_START_ANGLE, 0);
 
         barArc.setType(ArcType.OPEN);
@@ -854,6 +863,51 @@ public class Knob extends Region {
                 fireEvent(TARGET_SET_EVENT);
             }
         });
+    }
+
+    private List<Stop> reorderStops( final List<Stop> stops ) {
+
+        /*
+         * 0.0 -> 0.611
+         * 0.5 -> 0.0 & 1.0
+         * 1.0 -> 0.389
+         */
+        double range = 0.778;
+        double halfRange = range * 0.5;
+        Map<Double, Color> stopMap = new HashMap<>(stops.size());
+
+        stops.stream().filter(s -> s != null).forEach(s -> stopMap.put(s.getOffset(), s.getColor()));
+
+        List<Stop> sortedStops = new ArrayList<>(stops.size());
+
+        if ( !stopMap.isEmpty() ) {
+
+            SortedSet<Double> sortedFractions = new TreeSet<>(stopMap.keySet());
+
+            if ( sortedFractions.last() < 1 ) {
+                stopMap.put(1.0, stopMap.get(sortedFractions.last()));
+                sortedFractions.add(1.0);
+            }
+
+            if ( sortedFractions.first() > 0 ) {
+                stopMap.put(0.0, stopMap.get(sortedFractions.first()));
+                sortedFractions.add(0.0);
+            }
+
+            sortedFractions.stream().forEach(f -> {
+
+                double offset = f * range - halfRange;
+
+                offset = offset < 0 ? 1.0 + offset : offset;
+
+                sortedStops.add(new Stop(offset, stopMap.get(f)));
+
+            });
+
+        }
+
+        return sortedStops;
+
     }
 
     private void resize() {

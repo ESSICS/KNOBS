@@ -107,7 +107,7 @@ public class KnobPropertyEditorFactory extends DefaultPropertyEditorFactory {
         }
 
         void setStopList( ObservableList<Stop> stopList ) {
-            this.stopList.setAll(stopList);
+            this.stopList.set(stopList);
         }
 
         @SuppressWarnings( "ReturnOfCollectionOrArrayField" )
@@ -135,7 +135,9 @@ public class KnobPropertyEditorFactory extends DefaultPropertyEditorFactory {
                 popOver.setHeaderAlwaysVisible(true);
                 popOver.setTitle("Gradient Stops");
                 popOver.setAnimated(true);
+                popOver.setAutoHide(false);
                 popOver.setCloseButtonEnabled(true);
+                popOver.getRoot().getStylesheets().add("/styles/dark-style.css");
 
                 StopListEditorController controller = loader.<StopListEditorController>getController();
 
