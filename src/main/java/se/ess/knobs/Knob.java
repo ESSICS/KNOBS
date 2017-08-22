@@ -329,7 +329,14 @@ public class Knob extends Region {
 
             barGradient = new ConicalGradient(reorderStops(get()));
 
-            barArc.setStroke(barGradient.getImagePattern(new Rectangle(0, 0, PREFERRED_WIDTH, PREFERRED_HEIGHT)));
+            double width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
+            double height = getHeight() - getInsets().getTop() - getInsets().getBottom();
+
+            size = width < height ? width : height;
+
+            barArc.setCache(false);
+            barArc.setStroke(barGradient.getImagePattern(new Rectangle(0, 0, size, size)));
+            barArc.setCacheHint(CacheHint.SPEED);
 
         }
     };
