@@ -79,7 +79,7 @@ import static se.ess.knobs.KnobEvent.TARGET_SET;
 /**
  * @author Claudio Rosati, European Spallation Source ERIC
  * @author HanSolo, creator of the original Regulators classes.
- * @version 1.0.0 9 Aug 2017
+ * @version 1.0.3 23 Aug 2017
  * @see <a href="https://github.com/HanSolo/regulators">HanSolo's Regulators</a>
  */
 public class Knob extends Region {
