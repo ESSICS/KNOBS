@@ -865,9 +865,10 @@ public class Knob extends Region {
         unitText.fillProperty().bind(Bindings.createObjectBinding(() -> getTextColor().darker(), textColorProperty()));
         unitText.setTextOrigin(VPos.CENTER);
 
-        textMinTag = new Polygon(0.0, 0.7, 0.3, 0.7, 0.4, 0.5, 0.4, 0.9, 0.0, 0.9);
+//        textMinTag = new Polygon(0.0, 0.7, 0.3, 0.7, 0.4, 0.5, 0.5, 0.7, 0.6, 0.7, 0.6, 0.9, 0.0, 0.9);
+        textMinTag = new Polygon(0.0, 0.7, 0.6, 0.7, 0.6, 0.9, 0.0, 0.9);
 
-        textMinTag.fillProperty().bind(Bindings.createObjectBinding(() -> getColor().darker().darker().darker(), colorProperty()));
+        textMinTag.fillProperty().bind(Bindings.createObjectBinding(() -> getColor().darker().darker(), colorProperty()));
         textMinTag.visibleProperty().bind(extremaVisibleProperty());
 
         textMin = new Text(String.format(format, getMinValue()));
@@ -876,9 +877,10 @@ public class Knob extends Region {
         textMin.setTextOrigin(VPos.CENTER);
         textMin.visibleProperty().bind(extremaVisibleProperty());
 
-        textMaxTag = new Polygon(0.0, 0.7, 0.3, 0.7, 0.4, 0.5, 0.4, 0.9, 0.0, 0.9);
+//        textMaxTag = new Polygon(0.0, 0.7, 0.3, 0.7, 0.4, 0.5, 0.5, 0.7, 0.6, 0.7, 0.6, 0.9, 0.0, 0.9);
+        textMaxTag = new Polygon(0.0, 0.7, 0.6, 0.7, 0.6, 0.9, 0.0, 0.9);
 
-        textMaxTag.fillProperty().bind(Bindings.createObjectBinding(() -> getColor().darker().darker().darker(), colorProperty()));
+        textMaxTag.fillProperty().bind(Bindings.createObjectBinding(() -> getColor().darker().darker(), colorProperty()));
         textMaxTag.visibleProperty().bind(extremaVisibleProperty());
 
         textMax = new Text(String.format(format, getMaxValue()));
@@ -1096,31 +1098,43 @@ public class Knob extends Region {
             text.setFont(Fonts.robotoMedium(size * 0.216));
             text.relocate(( size - text.getLayoutBounds().getWidth() ) * 0.5, size * 0.33);
 
-            targetText.setFont(Fonts.robotoLight(size * 0.082));
+            targetText.setFont(Fonts.robotoLight(size * 0.11));
             targetText.relocate(( size - targetText.getLayoutBounds().getWidth() ) * 0.5, size * 0.25);
 
-            unitText.setFont(Fonts.robotoLight(size * 0.082));
-            unitText.relocate(( size - unitText.getLayoutBounds().getWidth() ) * 0.5, size * 0.64);
+            unitText.setFont(Fonts.robotoLight(size * 0.11));
+            unitText.relocate(( size - unitText.getLayoutBounds().getWidth() ) * 0.5, size * 0.6);
 
+//            textMinTag.getPoints().set( 0, size * 0.0 );     textMinTag.getPoints().set( 1, size * 0.886);
+//            textMinTag.getPoints().set( 2, size * 0.19);     textMinTag.getPoints().set( 3, size * 0.886);
+//            textMinTag.getPoints().set( 4, size * 0.21);     textMinTag.getPoints().set( 5, size * 0.856);
+//            textMinTag.getPoints().set( 6, size * 0.23);     textMinTag.getPoints().set( 7, size * 0.886);
+//            textMinTag.getPoints().set( 8, size * 0.27);     textMinTag.getPoints().set( 9, size * 0.886);
+//            textMinTag.getPoints().set(10, size * 0.27);     textMinTag.getPoints().set(11, size * 0.966);
+//            textMinTag.getPoints().set(12, size * 0.0 );     textMinTag.getPoints().set(13, size * 0.966);
             textMinTag.getPoints().set(0, size * 0.0 );     textMinTag.getPoints().set(1, size * 0.886);
-            textMinTag.getPoints().set(2, size * 0.19);     textMinTag.getPoints().set(3, size * 0.886);
-            textMinTag.getPoints().set(4, size * 0.21);     textMinTag.getPoints().set(5, size * 0.856);
-            textMinTag.getPoints().set(6, size * 0.21);     textMinTag.getPoints().set(7, size * 0.946);
-            textMinTag.getPoints().set(8, size * 0.0 );     textMinTag.getPoints().set(9, size * 0.946);
+            textMinTag.getPoints().set(2, size * 0.27);     textMinTag.getPoints().set(3, size * 0.886);
+            textMinTag.getPoints().set(4, size * 0.27);     textMinTag.getPoints().set(5, size * 0.966);
+            textMinTag.getPoints().set(6, size * 0.0 );     textMinTag.getPoints().set(7, size * 0.966);
 
-            textMin.setFont(Fonts.robotoLight(size * 0.04));
-            textMin.relocate(size * 0.007, size * 0.891);
+            textMin.setFont(Fonts.robotoRegular(size * 0.072));
+            textMin.relocate(size * 0.007, size * 0.878);
 
             setTextMin(getMinValue());
 
+//            textMaxTag.getPoints().set( 0, size * 1.0 );     textMaxTag.getPoints().set( 1, size * 0.886);
+//            textMaxTag.getPoints().set( 2, size * 0.81);     textMaxTag.getPoints().set( 3, size * 0.886);
+//            textMaxTag.getPoints().set( 4, size * 0.79);     textMaxTag.getPoints().set( 5, size * 0.856);
+//            textMaxTag.getPoints().set( 6, size * 0.77);     textMaxTag.getPoints().set( 7, size * 0.886);
+//            textMaxTag.getPoints().set( 8, size * 0.73);     textMaxTag.getPoints().set( 9, size * 0.886);
+//            textMaxTag.getPoints().set(10, size * 0.73);     textMaxTag.getPoints().set(11, size * 0.966);
+//            textMaxTag.getPoints().set(12, size * 1.0 );     textMaxTag.getPoints().set(13, size * 0.966);
             textMaxTag.getPoints().set(0, size * 1.0 );     textMaxTag.getPoints().set(1, size * 0.886);
-            textMaxTag.getPoints().set(2, size * 0.81);     textMaxTag.getPoints().set(3, size * 0.886);
-            textMaxTag.getPoints().set(4, size * 0.79);     textMaxTag.getPoints().set(5, size * 0.856);
-            textMaxTag.getPoints().set(6, size * 0.79);     textMaxTag.getPoints().set(7, size * 0.946);
-            textMaxTag.getPoints().set(8, size * 1.0 );     textMaxTag.getPoints().set(9, size * 0.946);
+            textMaxTag.getPoints().set(2, size * 0.73);     textMaxTag.getPoints().set(3, size * 0.886);
+            textMaxTag.getPoints().set(4, size * 0.73);     textMaxTag.getPoints().set(5, size * 0.966);
+            textMaxTag.getPoints().set(6, size * 1.0 );     textMaxTag.getPoints().set(7, size * 0.966);
 
-            textMax.setFont(Fonts.robotoLight(size * 0.04));
-            textMax.relocate(size * 0.797, size * 0.891);
+            textMax.setFont(Fonts.robotoRegular(size * 0.072));
+            textMax.relocate(size * 0.737, size * 0.878);
 
             setTextMax(getMaxValue());
 
@@ -1158,23 +1172,23 @@ public class Knob extends Region {
     private void setTextMax( final double value ) {
         if ( textMax != null ) {
             textMax.setText(String.format(format, value));
-            adjustTextSize(textMax, size * 0.196, size * 0.04);
-            textMax.setLayoutX(size * 0.797 + ( size * 0.196 - textMax.getLayoutBounds().getWidth() ) * 0.5);
+            adjustTextSize(textMax, size * 0.256, size * 0.072);
+            textMax.setLayoutX(size * 0.737 + ( size * 0.256 - textMax.getLayoutBounds().getWidth() ) * 0.5);
         }
     }
 
     private void setTextMin( final double value ) {
         if ( textMin != null ) {
             textMin.setText(String.format(format, value));
-            adjustTextSize(textMin, size * 0.196, size * 0.04);
-            textMin.setLayoutX(size * 0.007 + ( size * 0.196 - textMin.getLayoutBounds().getWidth() ) * 0.5);
+            adjustTextSize(textMin, size * 0.256, size * 0.072);
+            textMin.setLayoutX(size * 0.007 + ( size * 0.256 - textMin.getLayoutBounds().getWidth() ) * 0.5);
         }
     }
 
     private void setTargetText( final double value ) {
         if ( targetText != null ) {
             targetText.setText(String.format(format, value));
-            adjustTextSize(targetText, size * 0.30, size * 0.082);
+            adjustTextSize(targetText, size * 0.39, size * 0.11);
             targetText.setLayoutX(( size - targetText.getLayoutBounds().getWidth() ) * 0.5);
         }
     }
@@ -1182,7 +1196,7 @@ public class Knob extends Region {
     private void setUnitText( final String value ) {
         if ( unitText != null ) {
             unitText.setText(value);
-            adjustTextSize(unitText, size * 0.30, size * 0.082);
+            adjustTextSize(unitText, size * 0.39, size * 0.11);
             unitText.setLayoutX(( size - unitText.getLayoutBounds().getWidth() ) * 0.5);
         }
     }
