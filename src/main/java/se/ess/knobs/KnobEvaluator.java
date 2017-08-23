@@ -31,6 +31,7 @@ import javafx.stage.Stage;
  * @author Claudio Rosati, European Spallation Source ERIC
  * @version 1.0.0 8 Aug 2017
  */
+@SuppressWarnings( "ClassWithoutLogger" )
 public class KnobEvaluator extends Application implements Initializable {
 
     public static void main( String[] args ) {
