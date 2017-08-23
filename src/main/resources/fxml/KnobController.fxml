@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import org.controlsfx.control.PropertySheet?>
 
-<AnchorPane id="AnchorPane" prefHeight="512.0" prefWidth="856.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="se.ess.knobs.KnobController">
+<AnchorPane id="AnchorPane" prefHeight="512.0" prefWidth="856.0" stylesheets="@../styles/dark-style.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="se.ess.knobs.KnobController">
    <children>
       <SplitPane dividerPositions="0.6" layoutX="100.0" layoutY="52.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
