@@ -161,7 +161,9 @@ public class Knob extends Region {
     private final ObjectProperty<Color> backgroundColor = new SimpleObjectProperty<Color>(this, "backgroundColor", Color.TRANSPARENT) {
         @Override
         protected void invalidated() {
-            set(get() == null ? Color.TRANSPARENT : get());
+            if ( get() == null ) {
+                set(Color.TRANSPARENT);
+            }
         }
     };
 
@@ -183,7 +185,9 @@ public class Knob extends Region {
     private final ObjectProperty<Color> color = new SimpleObjectProperty<Color>(this, "color", DEFAULT_COLOR) {
         @Override
         protected void invalidated() {
-            set(get() == null ? DEFAULT_COLOR : get());
+            if ( get() == null ) {
+                set(DEFAULT_COLOR);
+            }
         }
     };
 
@@ -206,15 +210,25 @@ public class Knob extends Region {
         @Override
         protected void invalidated() {
 
-            set(clamp(get(), getMinValue(), getMaxValue()));
+            double val = get();
+            double min = getMinValue();
+            double max = getMaxValue();
 
-            if ( close(get(), getTargetValue(), ( getMaxValue() - getMinValue() ) * PROXIMITY_ERROR) ) {
+            if ( needsClamping(val, min, max) ) {
+
+                val = clamp(val, min, max);
+
+                set(val);
+
+            }
+
+            if ( close(val, getTargetValue(), ( max - min ) * PROXIMITY_ERROR) ) {
                 fireEvent(ADJUSTED_EVENT);
             } else {
                 fireEvent(ADJUSTING_EVENT);
             }
 
-            setText(get());
+            setText(val);
 
         }
     };
@@ -254,7 +268,9 @@ public class Knob extends Region {
     private final ObjectProperty<Color> currentValueColor = new SimpleObjectProperty<Color>(this, "currentValueColor", DEFAULT_CURRENT_VALUE_COLOR) {
         @Override
         protected void invalidated() {
-            set(get() == null ? DEFAULT_CURRENT_VALUE_COLOR : get());
+            if ( get() == null ) {
+                set(DEFAULT_CURRENT_VALUE_COLOR);
+            }
         }
     };
 
@@ -277,9 +293,17 @@ public class Knob extends Region {
         @Override
         protected void invalidated() {
 
-            set(clamp(get(), 0, 6));
+            int val = get();
 
-            format = MessageFormat.format("%.{0,number,###0}f", get());
+            if ( needsClamping(val, 0, 6) ) {
+
+                val = clamp(get(), 0, 6);
+
+                set(val);
+
+            }
+
+            format = MessageFormat.format("%.{0,number,###0}f", val);
 
             setText(getCurrentValue());
             setTextMax(getMaxValue());
@@ -325,9 +349,17 @@ public class Knob extends Region {
         @Override
         protected void invalidated() {
 
-            set(get() == null ? DEFAULT_STOPS : get());
+            ObservableList<Stop> val = get();
 
-            barGradient = new ConicalGradient(reorderStops(get()));
+            if ( val == null ) {
+
+                val = DEFAULT_STOPS;
+
+                set(val);
+
+            }
+
+            barGradient = new ConicalGradient(reorderStops(val));
 
             double width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
             double height = getHeight() - getInsets().getTop() - getInsets().getBottom();
@@ -368,7 +400,9 @@ public class Knob extends Region {
     private final ObjectProperty<Color> indicatorColor = new SimpleObjectProperty<Color>(this, "indicatorColor", DEFAULT_COLOR.darker()) {
         @Override
         protected void invalidated() {
-            set(get() == null ? DEFAULT_COLOR.darker() : get());
+            if ( get() == null ) {
+                set(DEFAULT_COLOR.darker());
+            }
         }
     };
 
@@ -390,10 +424,32 @@ public class Knob extends Region {
     private final DoubleProperty maxValue = new SimpleDoubleProperty(this, "maxValue", 100) {
         @Override
         protected void invalidated() {
-            set(clamp(get(), getMinValue(), Double.MAX_VALUE));
-            setTextMax(get());
-            setCurrentValue(clamp(getCurrentValue(), getMinValue(), get()));
-            setTargetValue(clamp(getCurrentValue(), getMinValue(), get()));
+
+            double val = get();
+            double min = getMinValue();
+
+            if ( needsClamping(val, min, Double.MAX_VALUE) ) {
+
+                val = clamp(val, min, Double.MAX_VALUE);
+
+                set(val);
+
+            }
+
+            setTextMax(val);
+
+            double cur = getCurrentValue();
+
+            if ( needsClamping(cur, min, val) ) {
+                setCurrentValue(clamp(cur, min, val));
+            }
+
+            double tgt = getTargetValue();
+
+            if ( needsClamping(tgt, min, val) ) {
+                setTargetValue(clamp(tgt, min, val));
+            }
+
         }
     };
 
@@ -415,10 +471,32 @@ public class Knob extends Region {
     private final DoubleProperty minValue = new SimpleDoubleProperty(this, "minValue", 0) {
         @Override
         protected void invalidated() {
-            set(clamp(get(), - Double.MAX_VALUE, getMaxValue()));
-            setTextMin(get());
-            setCurrentValue(clamp(getCurrentValue(), get(), getMaxValue()));
-            setTargetValue(clamp(getCurrentValue(), get(), getMaxValue()));
+
+            double val = get();
+            double max = getMaxValue();
+
+            if ( needsClamping(val, - Double.MAX_VALUE, max) ) {
+
+                val = clamp(val, - Double.MAX_VALUE, max);
+
+                set(val);
+
+            }
+
+            setTextMin(val);
+
+            double cur = getCurrentValue();
+
+            if ( needsClamping(cur, val, max) ) {
+                setCurrentValue(clamp(cur, val, max));
+            }
+
+            double tgt = getTargetValue();
+
+            if ( needsClamping(tgt, val, max) ) {
+                setTargetValue(clamp(tgt, val, max));
+            }
+
         }
     };
 
@@ -457,7 +535,9 @@ public class Knob extends Region {
     private final ObjectProperty<Color> selectionColor = new SimpleObjectProperty<Color>(this, "selectionColor", Color.WHITE) {
         @Override
         protected void invalidated() {
-            set(get() == null ? Color.WHITE : get());
+            if ( get() == null ) {
+                set(Color.WHITE);
+            }
         }
     };
 
@@ -479,7 +559,9 @@ public class Knob extends Region {
     private final ObjectProperty<Color> tagColor = new SimpleObjectProperty<Color>(this, "tagColor", Color.RED) {
         @Override
         protected void invalidated() {
-            set(get() == null ? Color.TRANSPARENT : get());
+            if ( get() == null ) {
+                set(Color.TRANSPARENT);
+            }
         }
     };
 
@@ -518,16 +600,26 @@ public class Knob extends Region {
     private final DoubleProperty targetValue = new SimpleDoubleProperty(this, "targetValue", 0) {
         @Override
         protected void invalidated() {
+            
+            double val = get();
+            double min = getMinValue();
+            double max = getMaxValue();
 
-            set(clamp(get(), getMinValue(), getMaxValue()));
+            if ( needsClamping(val, min, max) ) {
+                
+                val = clamp(val, min, max);
+                
+                set(val);
+                
+            }
 
-            if ( close(getCurrentValue(), get(), ( getMaxValue() - getMinValue() ) * PROXIMITY_ERROR) ) {
+            if ( close(getCurrentValue(), val, ( max - min ) * PROXIMITY_ERROR) ) {
                 fireEvent(ADJUSTED_EVENT);
             } else {
                 fireEvent(ADJUSTING_EVENT);
             }
 
-            setTargetText(get());
+            setTargetText(val);
 
         }
     };
@@ -550,7 +642,9 @@ public class Knob extends Region {
     private final ObjectProperty<Color> textColor = new SimpleObjectProperty<Color>(this, "textColor", Color.WHITE) {
         @Override
         protected void invalidated() {
-            set(get() == null ? Color.WHITE : get());
+            if ( get() == null ) {
+                set(Color.WHITE);
+            }
         }
     };
 
@@ -634,7 +728,7 @@ public class Knob extends Region {
 
     /**
      * Clamp the given {@code value} inside a range defined by the given minimum
-     * an maximum values.
+     * and maximum values.
      *
      * @param value The value to be clamped.
      * @param min   The clamp range minimum value.
@@ -654,7 +748,7 @@ public class Knob extends Region {
 
     /**
      * Clamp the given {@code value} inside a range defined by the given minimum
-     * an maximum values.
+     * and maximum values.
      *
      * @param value The value to be clamped.
      * @param min   The clamp range minimum value.
@@ -851,6 +945,34 @@ public class Knob extends Region {
 
     }
 
+    /**
+     * Tell if the given {@code value} needs to be clamped into the range defined
+     * by the given minimum and maximum values.
+     *
+     * @param value The value to be tested.
+     * @param min   The clamp range minimum value.
+     * @param max   The clamp range maximum value.
+     * @return {@code false} if the given value is inside the range, {@code true}
+     *         if it needs to be clamped.
+     */
+    private boolean needsClamping ( final double value, final double min, final double max ) {
+        return ( value < min ||  value > max );
+    }
+
+    /**
+     * Tell if the given {@code value} needs to be clamped into the range defined
+     * by the given minimum and maximum values.
+     *
+     * @param value The value to be tested.
+     * @param min   The clamp range minimum value.
+     * @param max   The clamp range maximum value.
+     * @return {@code false} if the given value is inside the range, {@code true}
+     *         if it needs to be clamped.
+     */
+    private boolean needsClamping ( final int value, final int min, final int max ) {
+        return ( value < min ||  value > max );
+    }
+
     private void registerListeners() {
         widthProperty().addListener(w -> resize());
         heightProperty().addListener(h -> resize());
@@ -860,12 +982,12 @@ public class Knob extends Region {
                 touchRotate(e.getSceneX(), e.getSceneY());
             }
         });
-        ring.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> { 
+        ring.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
             if (! isDisabled() ) {
                 touchRotate(e.getSceneX(), e.getSceneY());
             }
         });
-        ring.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> { 
+        ring.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
             if ( !isDisabled() ) {
                 fireEvent(TARGET_SET_EVENT);
             }
@@ -979,7 +1101,7 @@ public class Knob extends Region {
 
             unitText.setFont(Fonts.robotoLight(size * 0.082));
             unitText.relocate(( size - unitText.getLayoutBounds().getWidth() ) * 0.5, size * 0.64);
-            
+
             textMinTag.getPoints().set(0, size * 0.0 );     textMinTag.getPoints().set(1, size * 0.886);
             textMinTag.getPoints().set(2, size * 0.19);     textMinTag.getPoints().set(3, size * 0.886);
             textMinTag.getPoints().set(4, size * 0.21);     textMinTag.getPoints().set(5, size * 0.856);
