@@ -47,7 +47,8 @@ public class KnobEvaluator extends Application implements Initializable {
         Parent root = FXMLLoader.load(KnobEvaluator.class.getResource("/fxml/KnobController.fxml"));
         Scene scene = new Scene(root);
 
-        scene.getStylesheets().add("/styles/dark-style.css");
+        //  No more needed, because included in the FXML file.
+        //scene.getStylesheets().add("/styles/dark-style.css");
 
         stage.setTitle("Knob Evaluator");
         stage.setScene(scene);
