@@ -57,7 +57,7 @@ public class KnobBuilder {
     @SuppressWarnings( "unchecked" )
     public Knob build() {
 
-        final Knob knob = new Knob();
+        final Knob knob = createKnob();
 
         //  Inter-dependent properties.
         if ( properties.containsKey("minValue") ) {
@@ -510,6 +510,10 @@ public class KnobBuilder {
 
         return this;
 
+    }
+
+    protected Knob createKnob() {
+        return new Knob();
     }
 
 }
