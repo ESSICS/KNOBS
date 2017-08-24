@@ -140,8 +140,7 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("tagVisible", true)
             .hasFieldOrPropertyWithValue("targetValue", 34.567)
             .hasFieldOrPropertyWithValue("textColor", Color.SLATEGREY)
-            .hasFieldOrPropertyWithValue("unit", "dB")
-            ;
+            .hasFieldOrPropertyWithValue("unit", "dB");
 
         Knob knob2 = KnobBuilder.create()
                                 .backgroundColor(null)
@@ -198,8 +197,7 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("tagVisible", false)
             .hasFieldOrPropertyWithValue("targetValue", 100.0)
             .hasFieldOrPropertyWithValue("textColor", Color.WHITE)
-            .hasFieldOrPropertyWithValue("unit", (String) null)
-           ;
+            .hasFieldOrPropertyWithValue("unit", (String) null);
 
         double min = -100;
         double max =  100;
@@ -250,8 +248,7 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("tagVisible", false)
             .hasFieldOrPropertyWithValue("targetValue", -100.0)
             .hasFieldOrPropertyWithValue("textColor", Color.WHITE)
-            .hasFieldOrPropertyWithValue("unit", (String) null)
-            ;
+            .hasFieldOrPropertyWithValue("unit", (String) null);
 
     }
 
