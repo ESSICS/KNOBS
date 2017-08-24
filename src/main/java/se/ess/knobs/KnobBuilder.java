@@ -86,6 +86,9 @@ public class KnobBuilder {
         if ( properties.containsKey("decimals") ) {
             knob.setDecimals((int) properties.get("decimals"));
         }
+        if ( properties.containsKey("dragDisabled") ) {
+            knob.setDragDisabled((boolean) properties.get("dragDisabled"));
+        }
         if ( properties.containsKey("extremaVisible") ) {
             knob.setExtremaVisible((boolean) properties.get("extremaVisible"));
         }
@@ -231,6 +234,14 @@ public class KnobBuilder {
     public final KnobBuilder decimals( final int decimals ) {
 
         properties.put("decimals", decimals);
+
+        return this;
+
+    }
+
+    public final KnobBuilder dragDisabled( final boolean value ) {
+
+        properties.put("dragDisabled", value);
 
         return this;
 

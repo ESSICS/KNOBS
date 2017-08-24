@@ -90,6 +90,7 @@ public class KnobBuilderTest {
                                 .currentValueAlwaysVisible(false)
                                 .currentValueColor(Color.GAINSBORO)
                                 .decimals(3)
+                                .dragDisabled(true)
                                 .extremaVisible(true)
                                 .gradientStops((Stop) null)
                                 .id("pippo")
@@ -120,6 +121,7 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", false)
             .hasFieldOrPropertyWithValue("currentValueColor", Color.GAINSBORO)
             .hasFieldOrPropertyWithValue("decimals", 3)
+            .hasFieldOrPropertyWithValue("dragDisabled", true)
             .hasFieldOrPropertyWithValue("extremaVisible", true)
             .hasFieldOrPropertyWithValue("gradientStops", FXCollections.observableArrayList((Stop) null))
             .hasFieldOrPropertyWithValue("indicatorColor", Color.BLUEVIOLET)
@@ -147,6 +149,7 @@ public class KnobBuilderTest {
                                 .currentValueAlwaysVisible(true)
                                 .currentValueColor(null)
                                 .decimals(80)
+                                .dragDisabled(false)
                                 .extremaVisible(false)
                                 .gradientStops((List<Stop>) null)
                                 .id(null)
@@ -176,6 +179,7 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", true)
             .hasFieldOrPropertyWithValue("currentValueColor", Knob.DEFAULT_CURRENT_VALUE_COLOR)
             .hasFieldOrPropertyWithValue("decimals", 6)
+            .hasFieldOrPropertyWithValue("dragDisabled", false)
             .hasFieldOrPropertyWithValue("extremaVisible", false)
             .hasFieldOrPropertyWithValue("gradientStops", FXCollections.emptyObservableList())
             .hasFieldOrPropertyWithValue("id", null)
@@ -227,6 +231,7 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", true)
             .hasFieldOrPropertyWithValue("currentValueColor", Knob.DEFAULT_CURRENT_VALUE_COLOR)
             .hasFieldOrPropertyWithValue("decimals", 0)
+            .hasFieldOrPropertyWithValue("dragDisabled", false)
             .hasFieldOrPropertyWithValue("extremaVisible", false)
             .hasFieldOrPropertyWithValue("gradientStops", FXCollections.observableList(stops))
             .hasFieldOrPropertyWithValue("id", null)
@@ -344,6 +349,23 @@ public class KnobBuilderTest {
             .containsKey("decimals");
         assertThat(builder.properties.get("decimals"))
             .isExactlyInstanceOf(Integer.class)
+            .isEqualTo(value);
+
+    }
+
+    /**
+     * Test of dragDisabled method, of class KnobBuilder.
+     */
+    @Test
+    public void testDragDisabled() {
+
+        boolean value = true;
+        KnobBuilder builder = KnobBuilder.create().dragDisabled(value);
+
+        assertThat(builder.properties)
+            .containsKey("dragDisabled");
+        assertThat(builder.properties.get("dragDisabled"))
+            .isExactlyInstanceOf(Boolean.class)
             .isEqualTo(value);
 
     }

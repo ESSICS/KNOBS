@@ -326,6 +326,23 @@ public class Knob extends Region {
     }
 
     /*
+     * ---- dragDisabled -----------------------------------------------------
+     */
+    private final BooleanProperty dragDisabled = new SimpleBooleanProperty(this, "dragDisabled", false);
+
+    public BooleanProperty dragDisabledProperty() {
+        return dragDisabled;
+    }
+
+    public boolean isDragDisabled() {
+        return dragDisabled.get();
+    }
+
+    public void setDragDisabled( boolean dragDisabled ) {
+        this.dragDisabled.set(dragDisabled);
+    }
+
+    /*
      * ---- extremaVisible -----------------------------------------------------
      */
     private final BooleanProperty extremaVisible = new SimpleBooleanProperty(this, "extremaVisible", false);
@@ -865,7 +882,6 @@ public class Knob extends Region {
         unitText.fillProperty().bind(Bindings.createObjectBinding(() -> getTextColor().darker(), textColorProperty()));
         unitText.setTextOrigin(VPos.CENTER);
 
-//        textMinTag = new Polygon(0.0, 0.7, 0.3, 0.7, 0.4, 0.5, 0.5, 0.7, 0.6, 0.7, 0.6, 0.9, 0.0, 0.9);
         textMinTag = new Polygon(0.0, 0.7, 0.6, 0.7, 0.6, 0.9, 0.0, 0.9);
 
         textMinTag.fillProperty().bind(Bindings.createObjectBinding(() -> getColor().darker().darker(), colorProperty()));
@@ -877,7 +893,6 @@ public class Knob extends Region {
         textMin.setTextOrigin(VPos.CENTER);
         textMin.visibleProperty().bind(extremaVisibleProperty());
 
-//        textMaxTag = new Polygon(0.0, 0.7, 0.3, 0.7, 0.4, 0.5, 0.5, 0.7, 0.6, 0.7, 0.6, 0.9, 0.0, 0.9);
         textMaxTag = new Polygon(0.0, 0.7, 0.6, 0.7, 0.6, 0.9, 0.0, 0.9);
 
         textMaxTag.fillProperty().bind(Bindings.createObjectBinding(() -> getColor().darker().darker(), colorProperty()));
@@ -913,16 +928,31 @@ public class Knob extends Region {
             selectionColorProperty(),
             selectedProperty()
         ));
+        indicator.disableProperty().bind(dragDisabledProperty());
         indicator.fillProperty().bind(Bindings.createObjectBinding(
-            () -> isSelected() ? getSelectionColor() : getIndicatorColor(),
+            () -> { 
+                
+                Color c = isSelected() ? getSelectionColor() : getIndicatorColor();
+
+                return isDragDisabled() ? c.deriveColor(0, 1, 0.92, 0.6) : c;
+
+            },
             colorProperty(),
+            dragDisabledProperty(),
             indicatorColorProperty(),
             selectionColorProperty(),
             selectedProperty()
         ));
         indicator.strokeProperty().bind(Bindings.createObjectBinding(
-            () -> isSelected() ? getSelectionColor().darker().darker() : getIndicatorColor().darker().darker(),
+            () -> {
+                
+                Color c = isSelected() ? getSelectionColor().darker().darker() : getIndicatorColor().darker().darker();
+
+                return isDragDisabled() ? c.deriveColor(0, 1, 0.92, 0.6) : c;
+
+            },
             colorProperty(),
+            dragDisabledProperty(),
             indicatorColorProperty(),
             selectionColorProperty(),
             selectedProperty()
@@ -980,17 +1010,17 @@ public class Knob extends Region {
         heightProperty().addListener(h -> resize());
         disabledProperty().addListener(d -> setOpacity(isDisabled() ? 0.4 : 1.0));
         ring.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
-            if ( !isDisabled() ) {
+            if ( !isDisabled() && !isDragDisabled() ) {
                 touchRotate(e.getSceneX(), e.getSceneY());
             }
         });
         ring.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
-            if (! isDisabled() ) {
+            if ( !isDisabled() && !isDragDisabled() ) {
                 touchRotate(e.getSceneX(), e.getSceneY());
             }
         });
         ring.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
-            if ( !isDisabled() ) {
+            if ( !isDisabled() && !isDragDisabled() ) {
                 fireEvent(TARGET_SET_EVENT);
             }
         });
@@ -1104,13 +1134,6 @@ public class Knob extends Region {
             unitText.setFont(Fonts.robotoLight(size * 0.11));
             unitText.relocate(( size - unitText.getLayoutBounds().getWidth() ) * 0.5, size * 0.6);
 
-//            textMinTag.getPoints().set( 0, size * 0.0 );     textMinTag.getPoints().set( 1, size * 0.886);
-//            textMinTag.getPoints().set( 2, size * 0.19);     textMinTag.getPoints().set( 3, size * 0.886);
-//            textMinTag.getPoints().set( 4, size * 0.21);     textMinTag.getPoints().set( 5, size * 0.856);
-//            textMinTag.getPoints().set( 6, size * 0.23);     textMinTag.getPoints().set( 7, size * 0.886);
-//            textMinTag.getPoints().set( 8, size * 0.27);     textMinTag.getPoints().set( 9, size * 0.886);
-//            textMinTag.getPoints().set(10, size * 0.27);     textMinTag.getPoints().set(11, size * 0.966);
-//            textMinTag.getPoints().set(12, size * 0.0 );     textMinTag.getPoints().set(13, size * 0.966);
             textMinTag.getPoints().set(0, size * 0.0 );     textMinTag.getPoints().set(1, size * 0.886);
             textMinTag.getPoints().set(2, size * 0.27);     textMinTag.getPoints().set(3, size * 0.886);
             textMinTag.getPoints().set(4, size * 0.27);     textMinTag.getPoints().set(5, size * 0.966);
@@ -1121,13 +1144,6 @@ public class Knob extends Region {
 
             setTextMin(getMinValue());
 
-//            textMaxTag.getPoints().set( 0, size * 1.0 );     textMaxTag.getPoints().set( 1, size * 0.886);
-//            textMaxTag.getPoints().set( 2, size * 0.81);     textMaxTag.getPoints().set( 3, size * 0.886);
-//            textMaxTag.getPoints().set( 4, size * 0.79);     textMaxTag.getPoints().set( 5, size * 0.856);
-//            textMaxTag.getPoints().set( 6, size * 0.77);     textMaxTag.getPoints().set( 7, size * 0.886);
-//            textMaxTag.getPoints().set( 8, size * 0.73);     textMaxTag.getPoints().set( 9, size * 0.886);
-//            textMaxTag.getPoints().set(10, size * 0.73);     textMaxTag.getPoints().set(11, size * 0.966);
-//            textMaxTag.getPoints().set(12, size * 1.0 );     textMaxTag.getPoints().set(13, size * 0.966);
             textMaxTag.getPoints().set(0, size * 1.0 );     textMaxTag.getPoints().set(1, size * 0.886);
             textMaxTag.getPoints().set(2, size * 0.73);     textMaxTag.getPoints().set(3, size * 0.886);
             textMaxTag.getPoints().set(4, size * 0.73);     textMaxTag.getPoints().set(5, size * 0.966);
