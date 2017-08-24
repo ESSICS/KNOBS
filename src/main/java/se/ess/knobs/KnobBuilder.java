@@ -41,7 +41,7 @@ public class KnobBuilder {
         return new KnobBuilder();
     }
 
-    protected final Map<String, Object> properties = new HashMap<>(4);
+    private final Map<String, Object> properties = new HashMap<>(4);
 
     protected KnobBuilder() {
     }
