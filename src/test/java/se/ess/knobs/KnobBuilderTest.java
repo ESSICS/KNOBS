@@ -915,23 +915,6 @@ public class KnobBuilderTest {
     }
 
     /**
-     * Test of threadedInitialization method, of class KnobBuilder.
-     */
-    @Test
-    public void testThreadedInitialization() {
-
-        boolean value = true;
-        KnobBuilder builder = KnobBuilder.create().threadedInitialization(value);
-
-        assertThat(builder.properties)
-            .containsKey("threadedInitialization");
-        assertThat(builder.properties.get("threadedInitialization"))
-            .isExactlyInstanceOf(Boolean.class)
-            .isEqualTo(value);
-
-    }
-
-    /**
      * Test of translateX method, of class KnobBuilder.
      */
     @Test

@@ -21,6 +21,7 @@ import eu.hansolo.medusa.Fonts;
 import eu.hansolo.medusa.tools.ConicalGradient;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -139,62 +140,52 @@ public class Knob extends Region {
     private Polygon textMaxTag;
     private Text textMin;
     private Polygon textMinTag;
-    private final boolean threadedInitialization;
     private Text unitText;
+    private final List<Runnable> waitingEvents = Collections.synchronizedList(new ArrayList<>());
 
     public Knob() {
-        this(false);
-    }
 
-    public Knob( boolean threadedInitialization ) {
+        initSize();
 
-        this.threadedInitialization = threadedInitialization;
+        widthProperty().addListener(w -> {
+            if ( inited ) {
+                resize();
+            } else {
+                waitingEvents.add(() -> resize());
+            }
+        });
+        heightProperty().addListener(h -> {
+            if ( inited ) {
+                resize();
+            } else {
+                waitingEvents.add(() -> resize());
+            }
+        });
+        disabledProperty().addListener(d -> setOpacity(isDisabled() ? 0.4 : 1.0));
 
-        setPrefSize(
-            getPrefWidth()  > 0 ? getPrefWidth()  : PREFERRED_WIDTH,
-            getPrefHeight() > 0 ? getPrefHeight() : PREFERRED_HEIGHT
-        );
-        setMinSize(
-            getMinWidth()  > 0 ? getMinWidth()  : MINIMUM_WIDTH,
-            getMinHeight() > 0 ? getMinHeight() : MINIMUM_HEIGHT
-        );
-        setMaxSize(
-            getMaxWidth()  > 0 ? getMaxWidth()  : MAXIMUM_WIDTH,
-            getMaxHeight() > 0 ? getMaxHeight() : MAXIMUM_HEIGHT
-        );
+        initThread = new Thread(new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
 
-        if ( threadedInitialization ) {
+                init();
 
-            initThread = new Thread(new Task<Void>() {
-                @Override
-                protected Void call() throws Exception {
-
-                    init();
-
-                    inited = true;
-
-                    registerListeners();
-
-                    initThread = null;
-
-                    return null;
-
+                synchronized ( waitingEvents ) {
+                    while ( !waitingEvents.isEmpty() ) {
+                        Platform.runLater(waitingEvents.remove(0));
+                    }
                 }
-            });
 
-            initThread.setDaemon(true);
-            initThread.start();
+                inited = true;
+                initThread = null;
 
-        } else {
+                return null;
 
-            init();
+            }
+        });
 
-            inited = true;
+        initThread.setDaemon(true);
+        initThread.start();
 
-            registerListeners();
-
-        }
-        
     }
 
     /*
@@ -285,6 +276,12 @@ public class Knob extends Region {
 
             if ( inited ) {
                 setText(val);
+            } else {
+
+                final double fval = val;
+
+                waitingEvents.add(() -> setText(fval));
+
             }
 
         }
@@ -367,6 +364,13 @@ public class Knob extends Region {
                 setTextMax(getMaxValue());
                 setTextMin(getMinValue());
                 setTargetText(getTargetValue());
+            } else {
+                waitingEvents.add(() -> {
+                    setText(getCurrentValue());
+                    setTextMax(getMaxValue());
+                    setTextMin(getMinValue());
+                    setTargetText(getTargetValue());
+                });
             }
 
         }
@@ -435,19 +439,34 @@ public class Knob extends Region {
 
             }
 
-            if ( inited ) {
+            ConicalGradient bGrad = new ConicalGradient(reorderStops(val));
 
-                barGradient = new ConicalGradient(reorderStops(val));
+            if ( inited ) {
 
                 double width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
                 double height = getHeight() - getInsets().getTop() - getInsets().getBottom();
 
+                barGradient = bGrad;
                 size = width < height ? width : height;
 
                 barArc.setCache(false);
                 barArc.setStroke(barGradient.getImagePattern(new Rectangle(0, 0, size, size)));
                 barArc.setCacheHint(CacheHint.SPEED);
 
+            } else {
+                waitingEvents.add(() -> {
+
+                    double width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
+                    double height = getHeight() - getInsets().getTop() - getInsets().getBottom();
+
+                    barGradient = bGrad;
+                    size = width < height ? width : height;
+
+                    barArc.setCache(false);
+                    barArc.setStroke(barGradient.getImagePattern(new Rectangle(0, 0, size, size)));
+                    barArc.setCacheHint(CacheHint.SPEED);
+
+                });
             }
 
         }
@@ -518,6 +537,12 @@ public class Knob extends Region {
 
             if ( inited ) {
                 setTextMax(val);
+            } else {
+
+                double fval = val;
+
+                waitingEvents.add(() -> setTextMax(fval));
+
             }
 
             double cur = getCurrentValue();
@@ -567,6 +592,12 @@ public class Knob extends Region {
 
             if ( inited ) {
                 setTextMin(val);
+            } else {
+
+                double fval = val;
+
+                waitingEvents.add(() -> setTextMin(fval));
+
             }
 
             double cur = getCurrentValue();
@@ -705,6 +736,12 @@ public class Knob extends Region {
 
             if ( inited ) {
                 setTargetText(val);
+            } else {
+
+                double fval = val;
+
+                waitingEvents.add(() -> setTargetText(fval));
+
             }
 
         }
@@ -754,6 +791,8 @@ public class Knob extends Region {
         protected void invalidated() {
             if ( inited ) {
                 setUnitText(get());
+            } else {
+                waitingEvents.add(() -> setUnitText(get()));
             }
         }
     };
@@ -919,6 +958,21 @@ public class Knob extends Region {
 
         ring.fillProperty().bind(colorProperty());
         ring.setEffect(dropShadow);
+        ring.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
+            if ( !isDisabled() && !isDragDisabled() ) {
+                touchRotate(e.getSceneX(), e.getSceneY());
+            }
+        });
+        ring.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
+            if ( !isDisabled() && !isDragDisabled() ) {
+                touchRotate(e.getSceneX(), e.getSceneY());
+            }
+        });
+        ring.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
+            if ( !isDisabled() && !isDragDisabled() ) {
+                fireEvent(TARGET_SET_EVENT);
+            }
+        });
 
         mainCircle = new Circle();
 
@@ -1031,12 +1085,23 @@ public class Knob extends Region {
         ));
         pane.setEffect(highlight);
 
-        if ( threadedInitialization ) {
-            Platform.runLater(() -> getChildren().setAll(pane));
-        } else {
-            getChildren().setAll(pane);
-        }
+        Platform.runLater(() -> getChildren().setAll(pane));
 
+    }
+
+    private void initSize() {
+        setPrefSize(
+            getPrefWidth()  > 0 ? getPrefWidth()  : PREFERRED_WIDTH,
+            getPrefHeight() > 0 ? getPrefHeight() : PREFERRED_HEIGHT
+        );
+        setMinSize(
+            getMinWidth()  > 0 ? getMinWidth()  : MINIMUM_WIDTH,
+            getMinHeight() > 0 ? getMinHeight() : MINIMUM_HEIGHT
+        );
+        setMaxSize(
+            getMaxWidth()  > 0 ? getMaxWidth()  : MAXIMUM_WIDTH,
+            getMaxHeight() > 0 ? getMaxHeight() : MAXIMUM_HEIGHT
+        );
     }
 
     /**
@@ -1065,27 +1130,6 @@ public class Knob extends Region {
      */
     private boolean needsClamping ( final int value, final int min, final int max ) {
         return ( value < min ||  value > max );
-    }
-
-    private void registerListeners() {
-        widthProperty().addListener(w -> resize());
-        heightProperty().addListener(h -> resize());
-        disabledProperty().addListener(d -> setOpacity(isDisabled() ? 0.4 : 1.0));
-        ring.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
-            if ( !isDisabled() && !isDragDisabled() ) {
-                touchRotate(e.getSceneX(), e.getSceneY());
-            }
-        });
-        ring.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
-            if ( !isDisabled() && !isDragDisabled() ) {
-                touchRotate(e.getSceneX(), e.getSceneY());
-            }
-        });
-        ring.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
-            if ( !isDisabled() && !isDragDisabled() ) {
-                fireEvent(TARGET_SET_EVENT);
-            }
-        });
     }
 
     private List<Stop> reorderStops( final List<Stop> stops ) {

@@ -57,13 +57,7 @@ public class KnobBuilder {
     @SuppressWarnings( "unchecked" )
     public Knob build() {
 
-        boolean threadedInitialization = false;
-
-        if ( properties.containsKey("threadedInitialization") ) {
-            threadedInitialization = (boolean) properties.get("threadedInitialization");
-        }
-
-        final Knob knob = new Knob(threadedInitialization);
+        final Knob knob = new Knob();
 
         //  Inter-dependent properties.
         if ( properties.containsKey("minValue") ) {
@@ -500,14 +494,6 @@ public class KnobBuilder {
     public final KnobBuilder textColor( final Color color ) {
 
         properties.put("textColor", color);
-
-        return this;
-
-    }
-
-    public final KnobBuilder threadedInitialization( final boolean value ) {
-
-        properties.put("threadedInitialization", value);
 
         return this;
 
