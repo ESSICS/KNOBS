@@ -24,7 +24,6 @@ import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
-import javafx.scene.layout.Background;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Stop;
 import org.junit.After;
@@ -172,7 +171,6 @@ public class KnobBuilderTest {
         assertThat(knob2)
             .isNotNull()
             .hasFieldOrPropertyWithValue("backgroundColor", Color.TRANSPARENT)
-            .hasFieldOrPropertyWithValue("background", Background.EMPTY)
             .hasFieldOrPropertyWithValue("color", Knob.DEFAULT_COLOR)
             .hasFieldOrPropertyWithValue("currentValue", 100.0)
             .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", true)
@@ -223,7 +221,6 @@ public class KnobBuilderTest {
         assertThat(knob3)
             .isNotNull()
             .hasFieldOrPropertyWithValue("backgroundColor", Color.TRANSPARENT)
-            .hasFieldOrPropertyWithValue("background", Background.EMPTY)
             .hasFieldOrPropertyWithValue("color", Knob.DEFAULT_COLOR)
             .hasFieldOrPropertyWithValue("currentValue", -100.0)
             .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", true)

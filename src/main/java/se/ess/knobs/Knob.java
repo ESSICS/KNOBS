@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -42,6 +45,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
@@ -108,6 +112,8 @@ public class Knob extends Region {
     private static final double BAR_START_ANGLE  = -130;
     private static final double PROXIMITY_ERROR  = 0.001;
 
+    private static final Executor EXECUTOR = Executors.newCachedThreadPool();
+
     private final KnobEvent  ADJUSTING_EVENT = new KnobEvent(this, null, ADJUSTING);
     private final KnobEvent   ADJUSTED_EVENT = new KnobEvent(this, null, ADJUSTED);
     private final KnobEvent TARGET_SET_EVENT = new KnobEvent(this, null, TARGET_SET);
@@ -122,6 +128,7 @@ public class Knob extends Region {
     private InnerShadow indicatorHighlight;
     private InnerShadow indicatorInnerShadow;
     private Rotate indicatorRotate;
+    private volatile boolean inited = false;
     private InnerShadow innerShadow;
     private Circle mainCircle;
     private Pane pane;
@@ -138,8 +145,35 @@ public class Knob extends Region {
     private Text unitText;
 
     public Knob() {
-        init();
-        registerListeners();
+
+        setPrefSize(
+            getPrefWidth()  > 0 ? getPrefWidth()  : PREFERRED_WIDTH,
+            getPrefHeight() > 0 ? getPrefHeight() : PREFERRED_HEIGHT
+        );
+        setMinSize(
+            getMinWidth()  > 0 ? getMinWidth()  : MINIMUM_WIDTH,
+            getMinHeight() > 0 ? getMinHeight() : MINIMUM_HEIGHT
+        );
+        setMaxSize(
+            getMaxWidth()  > 0 ? getMaxWidth()  : MAXIMUM_WIDTH,
+            getMaxHeight() > 0 ? getMaxHeight() : MAXIMUM_HEIGHT
+        );
+
+        EXECUTOR.execute(new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+
+                init();
+
+                inited = true;
+
+                registerListeners();
+
+                return null;
+
+            }
+        });
+        
     }
 
     /*
@@ -228,7 +262,9 @@ public class Knob extends Region {
                 fireEvent(ADJUSTING_EVENT);
             }
 
-            setText(val);
+            if ( inited ) {
+                setText(val);
+            }
 
         }
     };
@@ -305,10 +341,12 @@ public class Knob extends Region {
 
             format = MessageFormat.format("%.{0,number,###0}f", val);
 
-            setText(getCurrentValue());
-            setTextMax(getMaxValue());
-            setTextMin(getMinValue());
-            setTargetText(getTargetValue());
+            if ( inited ) {
+                setText(getCurrentValue());
+                setTextMax(getMaxValue());
+                setTextMin(getMinValue());
+                setTargetText(getTargetValue());
+            }
 
         }
     };
@@ -376,16 +414,20 @@ public class Knob extends Region {
 
             }
 
-            barGradient = new ConicalGradient(reorderStops(val));
+            if ( inited ) {
 
-            double width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
-            double height = getHeight() - getInsets().getTop() - getInsets().getBottom();
+                barGradient = new ConicalGradient(reorderStops(val));
 
-            size = width < height ? width : height;
+                double width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
+                double height = getHeight() - getInsets().getTop() - getInsets().getBottom();
 
-            barArc.setCache(false);
-            barArc.setStroke(barGradient.getImagePattern(new Rectangle(0, 0, size, size)));
-            barArc.setCacheHint(CacheHint.SPEED);
+                size = width < height ? width : height;
+
+                barArc.setCache(false);
+                barArc.setStroke(barGradient.getImagePattern(new Rectangle(0, 0, size, size)));
+                barArc.setCacheHint(CacheHint.SPEED);
+
+            }
 
         }
     };
@@ -453,7 +495,9 @@ public class Knob extends Region {
 
             }
 
-            setTextMax(val);
+            if ( inited ) {
+                setTextMax(val);
+            }
 
             double cur = getCurrentValue();
 
@@ -500,7 +544,9 @@ public class Knob extends Region {
 
             }
 
-            setTextMin(val);
+            if ( inited ) {
+                setTextMin(val);
+            }
 
             double cur = getCurrentValue();
 
@@ -636,7 +682,9 @@ public class Knob extends Region {
                 fireEvent(ADJUSTING_EVENT);
             }
 
-            setTargetText(val);
+            if ( inited ) {
+                setTargetText(val);
+            }
 
         }
     };
@@ -683,7 +731,9 @@ public class Knob extends Region {
     private final StringProperty unit = new SimpleStringProperty(this, "unit", null) {
         @Override
         protected void invalidated() {
-            setUnitText(get());
+            if ( inited ) {
+                setUnitText(get());
+            }
         }
     };
 
@@ -797,19 +847,6 @@ public class Knob extends Region {
     }
 
     private void init() {
-
-        setPrefSize(
-            getPrefWidth()  > 0 ? getPrefWidth()  : PREFERRED_WIDTH,
-            getPrefHeight() > 0 ? getPrefHeight() : PREFERRED_HEIGHT
-        );
-        setMinSize(
-            getMinWidth()  > 0 ? getMinWidth()  : MINIMUM_WIDTH,
-            getMinHeight() > 0 ? getMinHeight() : MINIMUM_HEIGHT
-        );
-        setMaxSize(
-            getMaxWidth()  > 0 ? getMaxWidth()  : MAXIMUM_WIDTH,
-            getMaxHeight() > 0 ? getMaxHeight() : MAXIMUM_HEIGHT
-        );
 
         angleStepProperty().bind(Bindings.divide(ANGLE_RANGE, Bindings.subtract(maxValueProperty(), minValueProperty())));
         backgroundProperty().bind(Bindings.createObjectBinding(
@@ -973,7 +1010,7 @@ public class Knob extends Region {
         ));
         pane.setEffect(highlight);
 
-        getChildren().setAll(pane);
+        Platform.runLater(() -> getChildren().setAll(pane));
 
     }
 

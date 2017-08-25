@@ -60,6 +60,8 @@ public class KnobController implements Initializable {
 
         propertySheet.setPropertyEditorFactory(new KnobPropertyEditorFactory());
 
+        long beforeTime = System.currentTimeMillis();
+
         Knob knob = KnobBuilder.create()
                         .onAdjusted(e -> LOGGER.info(MessageFormat.format("Current value reached target: {0}", ((Knob) e.getSource()).getCurrentValue())))
                         .onTargetSet(e -> { 
@@ -67,6 +69,10 @@ public class KnobController implements Initializable {
                             updateCurrentValue = true;
                         })
                         .build();
+
+        long afterTime = System.currentTimeMillis();
+
+        LOGGER.log(Level.INFO, "Construction time: {0,number,#########0}ms", afterTime - beforeTime);
 
         knobContainer.getChildren().add(knob);
 
