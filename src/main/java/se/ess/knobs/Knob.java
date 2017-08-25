@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -112,8 +110,6 @@ public class Knob extends Region {
     private static final double BAR_START_ANGLE  = -130;
     private static final double PROXIMITY_ERROR  = 0.001;
 
-    private static final Executor EXECUTOR = Executors.newCachedThreadPool();
-
     private final KnobEvent  ADJUSTING_EVENT = new KnobEvent(this, null, ADJUSTING);
     private final KnobEvent   ADJUSTED_EVENT = new KnobEvent(this, null, ADJUSTED);
     private final KnobEvent TARGET_SET_EVENT = new KnobEvent(this, null, TARGET_SET);
@@ -129,6 +125,7 @@ public class Knob extends Region {
     private InnerShadow indicatorInnerShadow;
     private Rotate indicatorRotate;
     private volatile boolean inited = false;
+    private Thread initThread;
     private InnerShadow innerShadow;
     private Circle mainCircle;
     private Pane pane;
@@ -142,9 +139,16 @@ public class Knob extends Region {
     private Polygon textMaxTag;
     private Text textMin;
     private Polygon textMinTag;
+    private final boolean threadedInitialization;
     private Text unitText;
 
     public Knob() {
+        this(false);
+    }
+
+    public Knob( boolean threadedInitialization ) {
+
+        this.threadedInitialization = threadedInitialization;
 
         setPrefSize(
             getPrefWidth()  > 0 ? getPrefWidth()  : PREFERRED_WIDTH,
@@ -159,20 +163,37 @@ public class Knob extends Region {
             getMaxHeight() > 0 ? getMaxHeight() : MAXIMUM_HEIGHT
         );
 
-        EXECUTOR.execute(new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
+        if ( threadedInitialization ) {
 
-                init();
+            initThread = new Thread(new Task<Void>() {
+                @Override
+                protected Void call() throws Exception {
 
-                inited = true;
+                    init();
 
-                registerListeners();
+                    inited = true;
 
-                return null;
+                    registerListeners();
 
-            }
-        });
+                    initThread = null;
+
+                    return null;
+
+                }
+            });
+
+            initThread.setDaemon(true);
+            initThread.start();
+
+        } else {
+
+            init();
+
+            inited = true;
+
+            registerListeners();
+
+        }
         
     }
 
@@ -1010,7 +1031,11 @@ public class Knob extends Region {
         ));
         pane.setEffect(highlight);
 
-        Platform.runLater(() -> getChildren().setAll(pane));
+        if ( threadedInitialization ) {
+            Platform.runLater(() -> getChildren().setAll(pane));
+        } else {
+            getChildren().setAll(pane);
+        }
 
     }
 

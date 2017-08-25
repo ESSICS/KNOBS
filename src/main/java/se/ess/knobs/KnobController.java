@@ -63,6 +63,7 @@ public class KnobController implements Initializable {
         long beforeTime = System.currentTimeMillis();
 
         Knob knob = KnobBuilder.create()
+                        .threadedInitialization(true)
                         .onAdjusted(e -> LOGGER.info(MessageFormat.format("Current value reached target: {0}", ((Knob) e.getSource()).getCurrentValue())))
                         .onTargetSet(e -> { 
                             LOGGER.info(MessageFormat.format("Target changed: {0}", ((Knob) e.getSource()).getTargetValue()));
