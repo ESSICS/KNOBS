@@ -85,6 +85,7 @@ import static se.ess.knobs.KnobEvent.TARGET_SET;
  * @version 1.0.3 23 Aug 2017
  * @see <a href="https://github.com/HanSolo/regulators">HanSolo's Regulators</a>
  */
+@SuppressWarnings( "ClassWithoutLogger" )
 public class Knob extends Region {
 
     public static final Color               DEFAULT_COLOR = Color.rgb(66, 71, 79);
@@ -141,8 +142,9 @@ public class Knob extends Region {
     private Text textMin;
     private Polygon textMinTag;
     private Text unitText;
-    private final List<Runnable> waitingEvents = Collections.synchronizedList(new ArrayList<>());
+    private final List<Runnable> waitingEvents = Collections.synchronizedList(new ArrayList<>(4));
 
+    @SuppressWarnings( "CallToThreadStartDuringObjectConstruction" )
     public Knob() {
 
         initSize();
@@ -165,6 +167,7 @@ public class Knob extends Region {
 
         initThread = new Thread(new Task<Void>() {
             @Override
+            @SuppressWarnings( "CallToThreadYield" )
             protected Void call() throws Exception {
 
                 init();
@@ -172,6 +175,7 @@ public class Knob extends Region {
                 synchronized ( waitingEvents ) {
                     while ( !waitingEvents.isEmpty() ) {
                         Platform.runLater(waitingEvents.remove(0));
+                        Thread.yield();
                     }
                 }
 
@@ -809,9 +813,13 @@ public class Knob extends Region {
         this.unit.set(unit);
     }
 
-     /*
+    /*
      * -------------------------------------------------------------------------
      */
+    public void fireTargeValueSet() {
+        fireEvent(TARGET_SET_EVENT);
+    }
+
     public void removeOnAdjusted( final EventHandler<KnobEvent> handler ) {
         removeEventHandler(KnobEvent.ADJUSTED, handler);
     }
@@ -970,7 +978,7 @@ public class Knob extends Region {
         });
         ring.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
             if ( !isDisabled() && !isDragDisabled() ) {
-                fireEvent(TARGET_SET_EVENT);
+                fireTargeValueSet();
             }
         });
 
