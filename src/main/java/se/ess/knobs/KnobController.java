@@ -133,8 +133,8 @@ public class KnobController implements Initializable {
                 }
 
             }},
-            5000,
-            200,
+            2000,
+            50,
             TimeUnit.MILLISECONDS
         );
 
