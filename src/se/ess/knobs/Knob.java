@@ -116,6 +116,8 @@ public class Knob extends Region {
     private final KnobEvent   ADJUSTED_EVENT = new KnobEvent(this, null, ADJUSTED);
     private final KnobEvent TARGET_SET_EVENT = new KnobEvent(this, null, TARGET_SET);
 
+    protected Pane pane;
+
     private Arc barArc;
     private ConicalGradient barGradient;
     private Arc currentValueBarArc;
@@ -130,7 +132,6 @@ public class Knob extends Region {
     private Thread initThread;
     private InnerShadow innerShadow;
     private Circle mainCircle;
-    private Pane pane;
     private Shape ring;
     private double size;
     private String format = "%.2f";
@@ -170,7 +171,7 @@ public class Knob extends Region {
             @SuppressWarnings( "CallToThreadYield" )
             protected Void call() throws Exception {
 
-                init();
+                initComponents();
 
                 synchronized ( waitingEvents ) {
                     while ( !waitingEvents.isEmpty() ) {
@@ -844,77 +845,7 @@ public class Knob extends Region {
         addEventHandler(KnobEvent.TARGET_SET, handler);
     }
 
-    @SuppressWarnings( "AssignmentToMethodParameter" )
-    private void adjustTextSize( final Text textComponent, final double availableWidth, double fontSize ) {
-
-        final String fontName = textComponent.getFont().getName();
-
-        textComponent.setFont(new Font(fontName, fontSize));
-
-        while ( textComponent.getLayoutBounds().getWidth() > availableWidth && fontSize > 0 ) {
-
-            fontSize -= 0.005;
-
-            textComponent.setFont(new Font(fontName, fontSize));
-
-        }
-
-    }
-
-    /**
-     * Clamp the given {@code value} inside a range defined by the given minimum
-     * and maximum values.
-     *
-     * @param value The value to be clamped.
-     * @param min   The clamp range minimum value.
-     * @param max   The clamp range maximum value.
-     * @return {@code value} if it's inside the range, otherwise {@code min} if
-     *         {@code value} is below the range, or {@code max} if above the range.
-     */
-    private double clamp ( final double value, final double min, final double max ) {
-        if ( value < min ) {
-            return min;
-        } else if ( value > max ) {
-            return max;
-        } else {
-            return value;
-        }
-    }
-
-    /**
-     * Clamp the given {@code value} inside a range defined by the given minimum
-     * and maximum values.
-     *
-     * @param value The value to be clamped.
-     * @param min   The clamp range minimum value.
-     * @param max   The clamp range maximum value.
-     * @return {@code value} if it's inside the range, otherwise {@code min} if
-     *         {@code value} is below the range, or {@code max} if above the range.
-     */
-    private int clamp ( final int value, final int min, final int max ) {
-        if ( value < min ) {
-            return min;
-        } else if ( value > max ) {
-            return max;
-        } else {
-            return value;
-        }
-    }
-
-    /**
-     * Check it the given {@code value} is close to the target one for less than
-     * the specified {@code error}.
-     *
-     * @param value  The current value to be checked for proximity.
-     * @param target The target reference value.
-     * @param error  The proximity error.
-     * @return {@code true} if {@code ( value > target - error ) && ( value < target + error )}.
-     */
-    private boolean close ( final double value, final double target, final double error ) {
-        return ( value > target - error ) && ( value < target + error );
-    }
-
-    private void init() {
+    protected void initComponents() {
 
         angleStepProperty().bind(Bindings.divide(ANGLE_RANGE, Bindings.subtract(maxValueProperty(), minValueProperty())));
         backgroundProperty().bind(Bindings.createObjectBinding(
@@ -1050,8 +981,8 @@ public class Knob extends Region {
         ));
         indicator.disableProperty().bind(dragDisabledProperty());
         indicator.fillProperty().bind(Bindings.createObjectBinding(
-            () -> { 
-                
+            () -> {
+
                 Color c = isSelected() ? getSelectionColor() : getIndicatorColor();
 
                 return isDragDisabled() ? c.deriveColor(0, 1, 0.92, 0.6) : c;
@@ -1065,7 +996,7 @@ public class Knob extends Region {
         ));
         indicator.strokeProperty().bind(Bindings.createObjectBinding(
             () -> {
-                
+
                 Color c = isSelected() ? getSelectionColor().darker().darker() : getIndicatorColor().darker().darker();
 
                 return isDragDisabled() ? c.deriveColor(0, 1, 0.92, 0.6) : c;
@@ -1097,95 +1028,7 @@ public class Knob extends Region {
 
     }
 
-    private void initSize() {
-        setPrefSize(
-            getPrefWidth()  > 0 ? getPrefWidth()  : PREFERRED_WIDTH,
-            getPrefHeight() > 0 ? getPrefHeight() : PREFERRED_HEIGHT
-        );
-        setMinSize(
-            getMinWidth()  > 0 ? getMinWidth()  : MINIMUM_WIDTH,
-            getMinHeight() > 0 ? getMinHeight() : MINIMUM_HEIGHT
-        );
-        setMaxSize(
-            getMaxWidth()  > 0 ? getMaxWidth()  : MAXIMUM_WIDTH,
-            getMaxHeight() > 0 ? getMaxHeight() : MAXIMUM_HEIGHT
-        );
-    }
-
-    /**
-     * Tell if the given {@code value} needs to be clamped into the range defined
-     * by the given minimum and maximum values.
-     *
-     * @param value The value to be tested.
-     * @param min   The clamp range minimum value.
-     * @param max   The clamp range maximum value.
-     * @return {@code false} if the given value is inside the range, {@code true}
-     *         if it needs to be clamped.
-     */
-    private boolean needsClamping ( final double value, final double min, final double max ) {
-        return ( value < min ||  value > max );
-    }
-
-    /**
-     * Tell if the given {@code value} needs to be clamped into the range defined
-     * by the given minimum and maximum values.
-     *
-     * @param value The value to be tested.
-     * @param min   The clamp range minimum value.
-     * @param max   The clamp range maximum value.
-     * @return {@code false} if the given value is inside the range, {@code true}
-     *         if it needs to be clamped.
-     */
-    private boolean needsClamping ( final int value, final int min, final int max ) {
-        return ( value < min ||  value > max );
-    }
-
-    private List<Stop> reorderStops( final List<Stop> stops ) {
-
-        /*
-         * 0.0 -> 0.611
-         * 0.5 -> 0.0 & 1.0
-         * 1.0 -> 0.389
-         */
-        double range = 0.778;
-        double halfRange = range * 0.5;
-        Map<Double, Color> stopMap = new HashMap<>(stops.size());
-
-        stops.stream().filter(s -> s != null).forEach(s -> stopMap.put(s.getOffset(), s.getColor()));
-
-        List<Stop> sortedStops = new ArrayList<>(stops.size());
-
-        if ( !stopMap.isEmpty() ) {
-
-            SortedSet<Double> sortedFractions = new TreeSet<>(stopMap.keySet());
-
-            if ( sortedFractions.last() < 1 ) {
-                stopMap.put(1.0, stopMap.get(sortedFractions.last()));
-                sortedFractions.add(1.0);
-            }
-
-            if ( sortedFractions.first() > 0 ) {
-                stopMap.put(0.0, stopMap.get(sortedFractions.first()));
-                sortedFractions.add(0.0);
-            }
-
-            sortedFractions.stream().forEach(f -> {
-
-                double offset = f * range - halfRange;
-
-                offset = offset < 0 ? 1.0 + offset : offset;
-
-                sortedStops.add(new Stop(offset, stopMap.get(f)));
-
-            });
-
-        }
-
-        return sortedStops;
-
-    }
-
-    private void resize() {
+    protected void resize() {
 
         double width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
         double height = getHeight() - getInsets().getTop() - getInsets().getBottom();
@@ -1288,6 +1131,164 @@ public class Knob extends Region {
             indicatorRotate.setPivotY(center);
 
         }
+
+    }
+
+    @SuppressWarnings( "AssignmentToMethodParameter" )
+    private void adjustTextSize( final Text textComponent, final double availableWidth, double fontSize ) {
+
+        final String fontName = textComponent.getFont().getName();
+
+        textComponent.setFont(new Font(fontName, fontSize));
+
+        while ( textComponent.getLayoutBounds().getWidth() > availableWidth && fontSize > 0 ) {
+
+            fontSize -= 0.005;
+
+            textComponent.setFont(new Font(fontName, fontSize));
+
+        }
+
+    }
+
+    /**
+     * Clamp the given {@code value} inside a range defined by the given minimum
+     * and maximum values.
+     *
+     * @param value The value to be clamped.
+     * @param min   The clamp range minimum value.
+     * @param max   The clamp range maximum value.
+     * @return {@code value} if it's inside the range, otherwise {@code min} if
+     *         {@code value} is below the range, or {@code max} if above the range.
+     */
+    private double clamp ( final double value, final double min, final double max ) {
+        if ( value < min ) {
+            return min;
+        } else if ( value > max ) {
+            return max;
+        } else {
+            return value;
+        }
+    }
+
+    /**
+     * Clamp the given {@code value} inside a range defined by the given minimum
+     * and maximum values.
+     *
+     * @param value The value to be clamped.
+     * @param min   The clamp range minimum value.
+     * @param max   The clamp range maximum value.
+     * @return {@code value} if it's inside the range, otherwise {@code min} if
+     *         {@code value} is below the range, or {@code max} if above the range.
+     */
+    private int clamp ( final int value, final int min, final int max ) {
+        if ( value < min ) {
+            return min;
+        } else if ( value > max ) {
+            return max;
+        } else {
+            return value;
+        }
+    }
+
+    /**
+     * Check it the given {@code value} is close to the target one for less than
+     * the specified {@code error}.
+     *
+     * @param value  The current value to be checked for proximity.
+     * @param target The target reference value.
+     * @param error  The proximity error.
+     * @return {@code true} if {@code ( value > target - error ) && ( value < target + error )}.
+     */
+    private boolean close ( final double value, final double target, final double error ) {
+        return ( value > target - error ) && ( value < target + error );
+    }
+
+    private void initSize() {
+        setPrefSize(
+            getPrefWidth()  > 0 ? getPrefWidth()  : PREFERRED_WIDTH,
+            getPrefHeight() > 0 ? getPrefHeight() : PREFERRED_HEIGHT
+        );
+        setMinSize(
+            getMinWidth()  > 0 ? getMinWidth()  : MINIMUM_WIDTH,
+            getMinHeight() > 0 ? getMinHeight() : MINIMUM_HEIGHT
+        );
+        setMaxSize(
+            getMaxWidth()  > 0 ? getMaxWidth()  : MAXIMUM_WIDTH,
+            getMaxHeight() > 0 ? getMaxHeight() : MAXIMUM_HEIGHT
+        );
+    }
+
+    /**
+     * Tell if the given {@code value} needs to be clamped into the range defined
+     * by the given minimum and maximum values.
+     *
+     * @param value The value to be tested.
+     * @param min   The clamp range minimum value.
+     * @param max   The clamp range maximum value.
+     * @return {@code false} if the given value is inside the range, {@code true}
+     *         if it needs to be clamped.
+     */
+    private boolean needsClamping ( final double value, final double min, final double max ) {
+        return ( value < min ||  value > max );
+    }
+
+    /**
+     * Tell if the given {@code value} needs to be clamped into the range defined
+     * by the given minimum and maximum values.
+     *
+     * @param value The value to be tested.
+     * @param min   The clamp range minimum value.
+     * @param max   The clamp range maximum value.
+     * @return {@code false} if the given value is inside the range, {@code true}
+     *         if it needs to be clamped.
+     */
+    private boolean needsClamping ( final int value, final int min, final int max ) {
+        return ( value < min ||  value > max );
+    }
+
+    private List<Stop> reorderStops( final List<Stop> stops ) {
+
+        /*
+         * 0.0 -> 0.611
+         * 0.5 -> 0.0 & 1.0
+         * 1.0 -> 0.389
+         */
+        double range = 0.778;
+        double halfRange = range * 0.5;
+        Map<Double, Color> stopMap = new HashMap<>(stops.size());
+
+        stops.stream().filter(s -> s != null).forEach(s -> stopMap.put(s.getOffset(), s.getColor()));
+
+        List<Stop> sortedStops = new ArrayList<>(stops.size());
+
+        if ( !stopMap.isEmpty() ) {
+
+            SortedSet<Double> sortedFractions = new TreeSet<>(stopMap.keySet());
+
+            if ( sortedFractions.last() < 1 ) {
+                stopMap.put(1.0, stopMap.get(sortedFractions.last()));
+                sortedFractions.add(1.0);
+            }
+
+            if ( sortedFractions.first() > 0 ) {
+                stopMap.put(0.0, stopMap.get(sortedFractions.first()));
+                sortedFractions.add(0.0);
+            }
+
+            sortedFractions.stream().forEach(f -> {
+
+                double offset = f * range - halfRange;
+
+                offset = offset < 0 ? 1.0 + offset : offset;
+
+                sortedStops.add(new Stop(offset, stopMap.get(f)));
+
+            });
+
+        }
+
+        return sortedStops;
 
     }
 
