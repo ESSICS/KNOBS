@@ -77,8 +77,8 @@ public class KnobBuilder {
         if ( properties.containsKey("color") ) {
             knob.setColor((Color) properties.get("color"));
         }
-        if ( properties.containsKey("currentValueAlwaysVisible") ) {
-            knob.setCurrentValueAlwaysVisible((boolean) properties.get("currentValueAlwaysVisible"));
+        if ( properties.containsKey("targetValueAlwaysVisible") ) {
+            knob.setTargetValueAlwaysVisible((boolean) properties.get("targetValueAlwaysVisible"));
         }
         if ( properties.containsKey("currentValueColor") ) {
             knob.setCurrentValueColor((Color) properties.get("currentValueColor"));
@@ -210,14 +210,6 @@ public class KnobBuilder {
     public final KnobBuilder currentValue( final double value ) {
 
         properties.put("currentValue", value);
-
-        return this;
-
-    }
-
-    public final KnobBuilder currentValueAlwaysVisible( final boolean value ) {
-
-        properties.put("currentValueAlwaysVisible", value);
 
         return this;
 
@@ -486,6 +478,14 @@ public class KnobBuilder {
     public final KnobBuilder targetValue( final double value ) {
 
         properties.put("targetValue", value);
+
+        return this;
+
+    }
+
+    public final KnobBuilder targetValueAlwaysVisible( final boolean value ) {
+
+        properties.put("targetValueAlwaysVisible", value);
 
         return this;
 

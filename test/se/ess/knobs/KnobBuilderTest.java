@@ -86,7 +86,6 @@ public class KnobBuilderTest {
         Knob knob1 = KnobBuilder.create()
                                 .backgroundColor(Color.GOLDENROD)
                                 .color(Color.CORAL)
-                                .currentValueAlwaysVisible(false)
                                 .currentValueColor(Color.GAINSBORO)
                                 .decimals(3)
                                 .dragDisabled(true)
@@ -110,6 +109,7 @@ public class KnobBuilderTest {
                                 .maxValue(100)
                                 .currentValue(23.456)
                                 .targetValue(34.567)
+                                .targetValueAlwaysVisible(false)
                                 .build();
 
         assertThat(knob1)
@@ -117,7 +117,6 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("backgroundColor", Color.GOLDENROD)
             .hasFieldOrPropertyWithValue("color", Color.CORAL)
             .hasFieldOrPropertyWithValue("currentValue", 23.456)
-            .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", false)
             .hasFieldOrPropertyWithValue("currentValueColor", Color.GAINSBORO)
             .hasFieldOrPropertyWithValue("decimals", 3)
             .hasFieldOrPropertyWithValue("dragDisabled", true)
@@ -138,13 +137,13 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("tagColor", Color.NAVAJOWHITE)
             .hasFieldOrPropertyWithValue("tagVisible", true)
             .hasFieldOrPropertyWithValue("targetValue", 34.567)
+            .hasFieldOrPropertyWithValue("targetValueAlwaysVisible", false)
             .hasFieldOrPropertyWithValue("textColor", Color.SLATEGREY)
             .hasFieldOrPropertyWithValue("unit", "dB");
 
         Knob knob2 = KnobBuilder.create()
                                 .backgroundColor(null)
                                 .color(null)
-                                .currentValueAlwaysVisible(true)
                                 .currentValueColor(null)
                                 .decimals(80)
                                 .dragDisabled(false)
@@ -166,6 +165,7 @@ public class KnobBuilderTest {
                                 .maxValue(100)
                                 .currentValue(200)
                                 .targetValue(200)
+                                .targetValueAlwaysVisible(true)
                                 .build();
 
         assertThat(knob2)
@@ -173,7 +173,6 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("backgroundColor", Color.TRANSPARENT)
             .hasFieldOrPropertyWithValue("color", Knob.DEFAULT_COLOR)
             .hasFieldOrPropertyWithValue("currentValue", 100.0)
-            .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", true)
             .hasFieldOrPropertyWithValue("currentValueColor", Knob.DEFAULT_CURRENT_VALUE_COLOR)
             .hasFieldOrPropertyWithValue("decimals", 6)
             .hasFieldOrPropertyWithValue("dragDisabled", false)
@@ -194,6 +193,7 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("tagColor", Color.TRANSPARENT)
             .hasFieldOrPropertyWithValue("tagVisible", false)
             .hasFieldOrPropertyWithValue("targetValue", 100.0)
+            .hasFieldOrPropertyWithValue("targetValueAlwaysVisible", true)
             .hasFieldOrPropertyWithValue("textColor", Color.WHITE)
             .hasFieldOrPropertyWithValue("unit", (String) null);
 
@@ -223,7 +223,6 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("backgroundColor", Color.TRANSPARENT)
             .hasFieldOrPropertyWithValue("color", Knob.DEFAULT_COLOR)
             .hasFieldOrPropertyWithValue("currentValue", -100.0)
-            .hasFieldOrPropertyWithValue("currentValueAlwaysVisible", true)
             .hasFieldOrPropertyWithValue("currentValueColor", Knob.DEFAULT_CURRENT_VALUE_COLOR)
             .hasFieldOrPropertyWithValue("decimals", 0)
             .hasFieldOrPropertyWithValue("dragDisabled", false)
@@ -244,6 +243,7 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("tagColor", Color.RED)
             .hasFieldOrPropertyWithValue("tagVisible", false)
             .hasFieldOrPropertyWithValue("targetValue", -100.0)
+            .hasFieldOrPropertyWithValue("targetValueAlwaysVisible", false)
             .hasFieldOrPropertyWithValue("textColor", Color.WHITE)
             .hasFieldOrPropertyWithValue("unit", (String) null);
 
@@ -292,23 +292,6 @@ public class KnobBuilderTest {
             .containsKey("currentValue");
         assertThat(builder.properties.get("currentValue"))
             .isExactlyInstanceOf(Double.class)
-            .isEqualTo(value);
-
-    }
-
-    /**
-     * Test of currentValueAlwaysVisible method, of class KnobBuilder.
-     */
-    @Test
-    public void testCurrentValueAlwaysVisible() {
-
-        boolean value = true;
-        KnobBuilder builder = KnobBuilder.create().currentValueAlwaysVisible(value);
-
-        assertThat(builder.properties)
-            .containsKey("currentValueAlwaysVisible");
-        assertThat(builder.properties.get("currentValueAlwaysVisible"))
-            .isExactlyInstanceOf(Boolean.class)
             .isEqualTo(value);
 
     }
@@ -893,6 +876,23 @@ public class KnobBuilderTest {
             .containsKey("targetValue");
         assertThat(builder.properties.get("targetValue"))
             .isExactlyInstanceOf(Double.class)
+            .isEqualTo(value);
+
+    }
+
+    /**
+     * Test of targetValueAlwaysVisible method, of class KnobBuilder.
+     */
+    @Test
+    public void testTargetValueAlwaysVisible() {
+
+        boolean value = true;
+        KnobBuilder builder = KnobBuilder.create().targetValueAlwaysVisible(value);
+
+        assertThat(builder.properties)
+            .containsKey("targetValueAlwaysVisible");
+        assertThat(builder.properties.get("targetValueAlwaysVisible"))
+            .isExactlyInstanceOf(Boolean.class)
             .isEqualTo(value);
 
     }

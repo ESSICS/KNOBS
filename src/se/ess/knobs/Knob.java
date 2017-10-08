@@ -19,6 +19,7 @@ package se.ess.knobs;
 
 import eu.hansolo.medusa.Fonts;
 import eu.hansolo.medusa.tools.ConicalGradient;
+import java.awt.Toolkit;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +30,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -46,17 +46,22 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
+import javafx.scene.control.TextField;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
@@ -73,6 +78,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
+import org.controlsfx.control.PopOver;
 
 import static se.ess.knobs.KnobEvent.ADJUSTED;
 import static se.ess.knobs.KnobEvent.ADJUSTING;
@@ -121,6 +127,11 @@ public class Knob extends Region {
     private Arc barArc;
     private ConicalGradient barGradient;
     private Arc currentValueBarArc;
+    private EventHandler<MouseEvent> doubleClickHandler = e -> {
+        if ( e.getButton().equals(MouseButton.PRIMARY) && e.getClickCount() == 2 ) {
+            openEditor();
+        }
+    };
     private DropShadow dropShadow;
     private InnerShadow highlight;
     private Circle indicator;
@@ -302,23 +313,6 @@ public class Knob extends Region {
 
     public void setCurrentValue( double currentValue ) {
         this.currentValue.set(currentValue);
-    }
-
-    /*
-     * ---- currentValueAlwaysVisible ------------------------------------------
-     */
-    private final BooleanProperty currentValueAlwaysVisible = new SimpleBooleanProperty(this, "currentValueAlwaysVisible", true);
-
-    public BooleanProperty currentValueAlwaysVisibleProperty() {
-        return currentValueAlwaysVisible;
-    }
-
-    public boolean isCurrentValueAlwaysVisible() {
-        return currentValueAlwaysVisible.get();
-    }
-
-    public void setCurrentValueAlwaysVisible( boolean currentValueAlwaysVisible ) {
-        this.currentValueAlwaysVisible.set(currentValueAlwaysVisible);
     }
 
     /*
@@ -765,6 +759,23 @@ public class Knob extends Region {
     }
 
     /*
+     * ---- targetValueAlwaysVisible ------------------------------------------
+     */
+    private final BooleanProperty targetValueAlwaysVisible = new SimpleBooleanProperty(this, "targetValueAlwaysVisible", false);
+
+    public BooleanProperty targetValueAlwaysVisibleProperty() {
+        return targetValueAlwaysVisible;
+    }
+
+    public boolean isTargetValueAlwaysVisible() {
+        return targetValueAlwaysVisible.get();
+    }
+
+    public void setTargetValueAlwaysVisible( boolean targetValueAlwaysVisible ) {
+        this.targetValueAlwaysVisible.set(targetValueAlwaysVisible);
+    }
+
+    /*
      * ---- textColor ----------------------------------------------------------
      */
     private final ObjectProperty<Color> textColor = new SimpleObjectProperty<Color>(this, "textColor", Color.WHITE) {
@@ -870,15 +881,6 @@ public class Knob extends Region {
         barArc.setFill(null);
         barArc.setStroke(barGradient.getImagePattern(new Rectangle(0, 0, PREFERRED_WIDTH, PREFERRED_HEIGHT)));
 
-        BooleanBinding currentValueVisibleBinding = Bindings.createBooleanBinding(
-            () -> isCurrentValueAlwaysVisible() || !close(getCurrentValue(), getTargetValue(), ( getMaxValue() - getMinValue() ) * PROXIMITY_ERROR),
-            currentValueAlwaysVisibleProperty(),
-            currentValueProperty(),
-            targetValueProperty(),
-            maxValueProperty(),
-            minValueProperty()
-        );
-
         currentValueBarArc = new Arc(PREFERRED_WIDTH * 0.5, PREFERRED_HEIGHT * 0.5, PREFERRED_WIDTH * 0.46, PREFERRED_HEIGHT * 0.46, BAR_START_ANGLE, 0);
 
         currentValueBarArc.setType(ArcType.OPEN);
@@ -886,7 +888,6 @@ public class Knob extends Region {
         currentValueBarArc.setFill(null);
         currentValueBarArc.strokeProperty().bind(currentValueColorProperty());
         currentValueBarArc.lengthProperty().bind(Bindings.multiply(angleStepProperty(), Bindings.subtract(minValueProperty(), currentValueProperty())));
-        currentValueBarArc.visibleProperty().bind(currentValueVisibleBinding);
 
         double center = PREFERRED_WIDTH * 0.5;
 
@@ -916,21 +917,32 @@ public class Knob extends Region {
         mainCircle = new Circle();
 
         mainCircle.fillProperty().bind(Bindings.createObjectBinding(() -> getColor().darker().darker(), colorProperty()));
+        mainCircle.setOnMouseClicked(doubleClickHandler);
 
         text = new Text(String.format(format, getCurrentValue()));
 
         text.fillProperty().bind(textColorProperty());
+        text.setOnMouseClicked(doubleClickHandler);
         text.setTextOrigin(VPos.CENTER);
 
         targetText = new Text(String.format(format, getTargetValue()));
 
         targetText.fillProperty().bind(Bindings.createObjectBinding(() -> getTextColor().darker(), textColorProperty()));
+        targetText.setOnMouseClicked(doubleClickHandler);
         targetText.setTextOrigin(VPos.CENTER);
-        targetText.visibleProperty().bind(currentValueVisibleBinding);
+        targetText.visibleProperty().bind(Bindings.createBooleanBinding(
+            () -> isTargetValueAlwaysVisible() || !close(getCurrentValue(), getTargetValue(), ( getMaxValue() - getMinValue() ) * PROXIMITY_ERROR),
+            targetValueAlwaysVisibleProperty(),
+            currentValueProperty(),
+            targetValueProperty(),
+            maxValueProperty(),
+            minValueProperty()
+        ));
 
         unitText = new Text(getUnit());
 
         unitText.fillProperty().bind(Bindings.createObjectBinding(() -> getTextColor().darker(), textColorProperty()));
+        unitText.setOnMouseClicked(doubleClickHandler);
         unitText.setTextOrigin(VPos.CENTER);
 
         textMinTag = new Polygon(0.0, 0.7, 0.6, 0.7, 0.6, 0.9, 0.0, 0.9);
@@ -1245,6 +1257,53 @@ public class Knob extends Region {
      */
     private boolean needsClamping ( final int value, final int min, final int max ) {
         return ( value < min ||  value > max );
+    }
+
+    private void openEditor() {
+
+        final PopOver popOver = new PopOver();
+        final TextField textEditor = new TextField(text.getText());
+        BorderPane editorPane = new BorderPane(textEditor);
+
+        BorderPane.setMargin(textEditor, new Insets(12));
+        textEditor.setOnKeyReleased(e -> {
+            if ( KeyCode.ESCAPE.equals(e.getCode()) ) {
+                popOver.hide();
+            }
+        });
+        textEditor.setOnAction(e -> {
+            try {
+                setTargetValue(Double.parseDouble(textEditor.getText()));
+                fireTargeValueSet();
+            } catch ( NumberFormatException nfex ) {
+                Toolkit.getDefaultToolkit().beep();
+            } finally {
+                popOver.hide();
+            }
+        });
+
+        popOver.setContentNode(editorPane);
+        popOver.setDetachable(false);
+        popOver.setDetached(false);
+        popOver.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
+        popOver.setHeaderAlwaysVisible(true);
+        popOver.setHideOnEscape(true);
+        popOver.setTitle("Set Target Value");
+        popOver.setAnimated(true);
+        popOver.setAutoHide(true);
+        popOver.setCloseButtonEnabled(true);
+
+        text.getScene().getStylesheets().stream().forEach(s -> popOver.getRoot().getStylesheets().add(s));
+
+        Bounds bounds = getBoundsInLocal();
+        Bounds screenBounds = localToScreen(bounds);
+        int x = (int) screenBounds.getMinX();
+        int y = (int) screenBounds.getMinY();
+        int w = (int) screenBounds.getWidth();
+        int h = (int) screenBounds.getHeight();
+
+        popOver.show(this, x + w / 2, y + h / 2);
+        
     }
 
     private List<Stop> reorderStops( final List<Stop> stops ) {
