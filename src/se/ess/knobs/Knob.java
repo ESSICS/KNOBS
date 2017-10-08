@@ -1262,7 +1262,7 @@ public class Knob extends Region {
     private void openEditor() {
 
         final PopOver popOver = new PopOver();
-        final TextField textEditor = new TextField(text.getText());
+        final TextField textEditor = new TextField(targetText.getText());
         BorderPane editorPane = new BorderPane(textEditor);
 
         BorderPane.setMargin(textEditor, new Insets(12));
