@@ -123,6 +123,7 @@ public class Knob extends Region {
     private final KnobEvent TARGET_SET_EVENT = new KnobEvent(this, null, TARGET_SET);
 
     protected Pane pane;
+    protected double size;
 
     private Arc barArc;
     private ConicalGradient barGradient;
@@ -144,7 +145,6 @@ public class Knob extends Region {
     private InnerShadow innerShadow;
     private Circle mainCircle;
     private Shape ring;
-    private double size;
     private String format = "%.2f";
     private Arc tagBarArc;
     private Text targetText;
