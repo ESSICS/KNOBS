@@ -77,9 +77,6 @@ public class KnobBuilder {
         if ( properties.containsKey("color") ) {
             knob.setColor((Color) properties.get("color"));
         }
-        if ( properties.containsKey("targetValueAlwaysVisible") ) {
-            knob.setTargetValueAlwaysVisible((boolean) properties.get("targetValueAlwaysVisible"));
-        }
         if ( properties.containsKey("currentValueColor") ) {
             knob.setCurrentValueColor((Color) properties.get("currentValueColor"));
         }
@@ -179,6 +176,9 @@ public class KnobBuilder {
         if ( properties.containsKey("tagVisible") ) {
             knob.setTagVisible((boolean) properties.get("tagVisible"));
         }
+        if ( properties.containsKey("targetValueAlwaysVisible") ) {
+            knob.setTargetValueAlwaysVisible((boolean) properties.get("targetValueAlwaysVisible"));
+        }
         if ( properties.containsKey("targetValue") ) {
             knob.setTargetValue((double) properties.get("targetValue"));
         }
@@ -193,6 +193,9 @@ public class KnobBuilder {
         }
         if ( properties.containsKey("unit") ) {
             knob.setUnit((String) properties.get("unit"));
+        }
+        if ( properties.containsKey("zeroDetentEnabled") ) {
+            knob.setZeroDetentEnabled((boolean) properties.get("zeroDetentEnabled"));
         }
 
         return knob;
@@ -518,6 +521,14 @@ public class KnobBuilder {
     public final KnobBuilder unit( final String unit ) {
 
         properties.put("unit", unit);
+
+        return this;
+
+    }
+
+    public final KnobBuilder zeroDetentEnabled( final boolean value ) {
+
+        properties.put("zeroDetentEnabled", value);
 
         return this;
 

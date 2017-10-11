@@ -826,6 +826,23 @@ public class Knob extends Region {
     }
 
     /*
+     * ---- zeroDetentEnabled ---------------------------------------------------------
+     */
+    private final BooleanProperty zeroDetentEnabled = new SimpleBooleanProperty(this, "zeroDetentEnabled", false);
+
+    public BooleanProperty zeroDetentEnabledProperty() {
+        return zeroDetentEnabled;
+    }
+
+    public boolean isZeroDetentEnabled() {
+        return zeroDetentEnabled.get();
+    }
+
+    public void setZeroDetentEnabled( boolean zeroDetentEnabled ) {
+        this.zeroDetentEnabled.set(zeroDetentEnabled);
+    }
+
+    /*
      * -------------------------------------------------------------------------
      */
     public void fireTargeValueSet() {
@@ -887,7 +904,60 @@ public class Knob extends Region {
         currentValueBarArc.setStrokeLineCap(StrokeLineCap.ROUND);
         currentValueBarArc.setFill(null);
         currentValueBarArc.strokeProperty().bind(currentValueColorProperty());
-        currentValueBarArc.lengthProperty().bind(Bindings.multiply(angleStepProperty(), Bindings.subtract(minValueProperty(), currentValueProperty())));
+        currentValueBarArc.lengthProperty().bind(Bindings.createDoubleBinding(() -> {
+
+                    double localMin = ( isZeroDetentEnabled() && getMinValue() < 0 ) ? Math.min(0, getMaxValue()) : getMinValue();
+                    double length = getAngleStep() * ( localMin - getCurrentValue() );
+
+                    if ( length == 0 ) {
+                        length = getAngleStep() * ( getMinValue() - getMaxValue() ) / 10000;
+                    }
+
+                    return length;
+
+                },
+                angleStepProperty(),
+                currentValueProperty(),
+                maxValueProperty(),
+                minValueProperty(),
+                zeroDetentEnabledProperty()
+            )
+        );
+        currentValueBarArc.opacityProperty().bind(Bindings.createDoubleBinding(() -> {
+
+                    double localMin = ( isZeroDetentEnabled() && getMinValue() < 0 ) ? Math.min(0, getMaxValue()) : getMinValue();
+                    double length = getAngleStep() * ( localMin - getCurrentValue() );
+
+                    if ( length == 0 ) {
+                        return 0.6666;
+                    } else {
+                        return 1.0;
+                    }
+
+                },
+                angleStepProperty(),
+                currentValueProperty(),
+                maxValueProperty(),
+                minValueProperty(),
+                zeroDetentEnabledProperty()
+            )
+        );
+        currentValueBarArc.startAngleProperty().bind(Bindings.createDoubleBinding(() -> {
+
+                    double angle = BAR_START_ANGLE;
+
+                    if ( isZeroDetentEnabled() && getMinValue() < 0 ) {
+                       angle += Math.max(getAngleStep() * getMinValue(), - ANGLE_RANGE);
+                    }
+
+                    return angle;
+
+                },
+                angleStepProperty(),
+                minValueProperty(),
+                zeroDetentEnabledProperty()
+            )
+        );
 
         double center = PREFERRED_WIDTH * 0.5;
 

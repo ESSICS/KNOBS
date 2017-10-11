@@ -110,6 +110,7 @@ public class KnobBuilderTest {
                                 .currentValue(23.456)
                                 .targetValue(34.567)
                                 .targetValueAlwaysVisible(false)
+                                .zeroDetentEnabled(false)
                                 .build();
 
         assertThat(knob1)
@@ -139,7 +140,8 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("targetValue", 34.567)
             .hasFieldOrPropertyWithValue("targetValueAlwaysVisible", false)
             .hasFieldOrPropertyWithValue("textColor", Color.SLATEGREY)
-            .hasFieldOrPropertyWithValue("unit", "dB");
+            .hasFieldOrPropertyWithValue("unit", "dB")
+            .hasFieldOrPropertyWithValue("zeroDetentEnabled", false);
 
         Knob knob2 = KnobBuilder.create()
                                 .backgroundColor(null)
@@ -166,6 +168,7 @@ public class KnobBuilderTest {
                                 .currentValue(200)
                                 .targetValue(200)
                                 .targetValueAlwaysVisible(true)
+                                .zeroDetentEnabled(true)
                                 .build();
 
         assertThat(knob2)
@@ -195,7 +198,8 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("targetValue", 100.0)
             .hasFieldOrPropertyWithValue("targetValueAlwaysVisible", true)
             .hasFieldOrPropertyWithValue("textColor", Color.WHITE)
-            .hasFieldOrPropertyWithValue("unit", (String) null);
+            .hasFieldOrPropertyWithValue("unit", (String) null)
+            .hasFieldOrPropertyWithValue("zeroDetentEnabled", true);
 
         double min = -100;
         double max =  100;
@@ -245,7 +249,8 @@ public class KnobBuilderTest {
             .hasFieldOrPropertyWithValue("targetValue", -100.0)
             .hasFieldOrPropertyWithValue("targetValueAlwaysVisible", false)
             .hasFieldOrPropertyWithValue("textColor", Color.WHITE)
-            .hasFieldOrPropertyWithValue("unit", (String) null);
+            .hasFieldOrPropertyWithValue("unit", (String) null)
+            .hasFieldOrPropertyWithValue("zeroDetentEnabled", false);
 
     }
 
@@ -961,6 +966,23 @@ public class KnobBuilderTest {
             .containsKey("unit");
         assertThat(builder.properties.get("unit"))
             .isExactlyInstanceOf(String.class)
+            .isEqualTo(value);
+
+    }
+
+    /**
+     * Test of zeroDetentEnabled method, of class KnobBuilder.
+     */
+    @Test
+    public void testZeroDetentEnabled() {
+
+        boolean value = true;
+        KnobBuilder builder = KnobBuilder.create().zeroDetentEnabled(value);
+
+        assertThat(builder.properties)
+            .containsKey("zeroDetentEnabled");
+        assertThat(builder.properties.get("zeroDetentEnabled"))
+            .isExactlyInstanceOf(Boolean.class)
             .isEqualTo(value);
 
     }
