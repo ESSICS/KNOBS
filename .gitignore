@@ -1,4 +1,4 @@
-/build/
-/dist/
-/nbproject/private/
 /.projectKnowledge/
+/nbproject/private/
+/target/
+/javadoc/

@@ -1,7 +1,0 @@
-.root {
-    -fx-base: rgba(30.5, 32, 33, 255);
-}
-
-.popover > .border {
-	-fx-fill: derive(-fx-base,-26.4%);
-}
