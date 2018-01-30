@@ -1,8 +1,9 @@
 # KNOBS
 
-An ESS specific extension and reworking of [HanSolo](https://github.com/HanSolo?tab=repositories)'s [regulators](https://github.com/HanSolo/regulators).
-
 [![Maven Central](https://img.shields.io/maven-central/v/se.europeanspallationsource/javafx.control.knobs.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22se.europeanspallationsource%22)
+[![javadoc](https://www.javadoc.io/badge/se.europeanspallationsource/javafx.control.knobs.svg?color=orange)](https://www.javadoc.io/doc/se.europeanspallationsource/javafx.control.knobs)
+
+An ESS specific extension and reworking of [HanSolo](https://github.com/HanSolo?tab=repositories)'s [regulators](https://github.com/HanSolo/regulators).
 
 ![KnobEvaluator](https://github.com/ESSICS/KNOBS/blob/master/doc/KnobEvaluator.png)
 
