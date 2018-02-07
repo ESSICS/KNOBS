@@ -40,6 +40,15 @@ public class KnobEvaluator extends ApplicationTest {
     private static final Logger LOGGER = Logger.getLogger(KnobEvaluator.class.getName());
 
     @Override
+    public void init() throws Exception {
+
+//        System.setProperty("com.sun.javafx.highContrastTheme", "yellowOnBlack");
+
+        super.init();
+
+    }
+
+    @Override
     public void start( Stage stage ) throws Exception {
 
         try {
@@ -48,7 +57,7 @@ public class KnobEvaluator extends ApplicationTest {
             Scene scene = new Scene(root);
 
             //  No more needed, because included in the FXML file.
-            scene.getStylesheets().add("/styles/dark-style.css");
+            //scene.getStylesheets().add("/styles/dark-style.css");
 
             stage.initStyle(DECORATED);
             stage.setOnCloseRequest(e -> System.exit(0));
