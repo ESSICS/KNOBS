@@ -36,6 +36,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Region;
 import org.controlsfx.control.PropertySheet;
@@ -69,6 +73,21 @@ public class KnobController implements Initializable {
                             updateCurrentValue = true;
                         })
                         .build();
+
+		knob.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+
+			if ( e.getButton().equals(MouseButton.SECONDARY) ) {
+
+				ContextMenu contextMenu = new ContextMenu();
+
+				contextMenu.getItems().add(new MenuItem("About"));
+				contextMenu.getItems().add(new MenuItem("Preferences"));
+				contextMenu.setAutoHide(true);
+				contextMenu.show(knob, e.getScreenX(), e.getScreenY());
+
+			}
+
+		});
 
         long afterTime = System.currentTimeMillis();
 

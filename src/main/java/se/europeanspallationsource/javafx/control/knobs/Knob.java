@@ -983,6 +983,12 @@ public class Knob extends Region {
                 fireTargeValueSet();
             }
         });
+		ring.addEventFilter(MouseEvent.ANY, e -> {
+			//	Enable only left-click events.
+			if ( !e.getButton().equals(MouseButton.PRIMARY) ) {
+				e.consume();
+			}
+		});
 
         mainCircle = new Circle();
 
@@ -1207,7 +1213,7 @@ public class Knob extends Region {
 
             indicator.setRadius(size * 0.032);
             indicator.setCenterX(center);
-            indicator.setCenterY(size * 0.148);
+            indicator.setCenterY(size * 0.140);
 
             indicatorRotate.setPivotX(center);
             indicatorRotate.setPivotY(center);
