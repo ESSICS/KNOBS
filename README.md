@@ -16,7 +16,7 @@ To add a dependency on THUMBWHEEL using Maven, use the following:
 <dependency>
     <groupId>se.europeanspallationsource</groupId>
     <artifactId>javafx.control.knobs</artifactId>
-    <version>1.0.13</version>
+    <version>1.0.14</version>
     <scope>compile</scope>
 </dependency>
 ```
